@@ -23,11 +23,7 @@
          <el-table-column type="index"></el-table-column>
          <el-table-column label="姓名" prop="name"></el-table-column>
          <el-table-column label="密码" prop="password"></el-table-column>
-         <el-table-column label="状态" prop="status">
-           <template slot-scope="scope">
-             <el-switch v-model="scope.row.ststus" @change="userStateChange(scope.row)"></el-switch>
-           </template>
-         </el-table-column>
+         <el-table-column label="权限" prop="status"></el-table-column>
          <el-table-column label="操作">
            <template slot-scope="scope">
              {{scope.nodes}}
@@ -35,7 +31,7 @@
                <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)"></el-button>
              </el-tooltip>
              <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-               <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUserById(scope.row.id)"></el-button>
+               <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUserById(scope.row.id, scope.row.status)"></el-button>
              </el-tooltip>
              <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
@@ -90,7 +86,7 @@
           <el-input v-model="editForm.name"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="editForm.password"></el-input>
+          <el-input v-model="editForm.password" v-if="show"></el-input>
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-input v-model="editForm.status"></el-input>
@@ -139,17 +135,45 @@ export default {
           {
             required: true,
             message: '请输入用户名',
-            trigger: 'blue'
+            trigger: 'blur'
           },
-          { min: 3, max: 10, message: '用户名的长度再3-10个字符之间', trigger: 'blur' }
+          {
+            min: 3,
+            max: 10,
+            message: '用户名的长度再3-10个字符之间',
+            trigger: 'blur'
+          },
+          {
+            pattern: /^((?!\\|\/|:|\*|\?|<|>|\||'|%).){3,10}$/,
+            message: '用户名不能包含特殊字符',
+            trigger: 'blur'
+          }
         ],
         password: [
           {
             required: true,
             message: '请输入密码',
-            trigger: 'blue'
+            trigger: 'blur'
           },
-          { min: 6, max: 15, message: '密码的长度再6-15个字符之间', trigger: 'blur' }
+          {
+            min: 3,
+            max: 15,
+            message: '密码的长度再3-15个字符之间',
+            trigger: 'blur'
+          }
+        ],
+        status: [
+          {
+            required: true,
+            message: '请输入用户权限',
+            trigger: 'blur'
+          },
+          { min: 1, max: 1, message: '用户的权限只能为0或1', trigger: 'blur' },
+          {
+            pattern: /0|1/,
+            message: '权限只能为0或1',
+            trigger: 'blur'
+          }
         ]
       }
     }
@@ -164,6 +188,12 @@ export default {
         return this.$message.error('数据获取失败')
       }
       this.userlist = res.data.users
+      const tokenStr = window.sessionStorage.getItem('token')
+      if (tokenStr !== '0') {
+        for (let i = 0; i < this.userlist.length; i++) {
+          this.userlist[i].password = '不可见'
+        }
+      }
       this.totalpage = res.data.totalpage
       console.log(res)
     },
@@ -192,6 +222,11 @@ export default {
       this.$refs.addFormRef.resetFields()
     },
     addUser() {
+      const tokenStr = window.sessionStorage.getItem('token')
+      console.log(tokenStr)
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
         const { data: res } = await this.$http.post('user/addUser', this.addForm)
@@ -207,6 +242,11 @@ export default {
       this.$refs.editFormRef.resetFields()
     },
     async showEditDialog(id) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      console.log(tokenStr)
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
       const { data: res } = await this.$http.get('user/getUserById', { params: { id } })
       if (res.meta.status !== '200') {
         return this.$message.error('查询用户信息失败')
@@ -225,7 +265,14 @@ export default {
       await this.getUserList()
     },
     // 根据id删除对应的用户信息
-    async removeUserById(id) {
+    async removeUserById(id, status) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      if (id.toString() === window.sessionStorage.getItem('id')) {
+        return this.$message.error('你不能删除你自己')
+      }
       // 弹框询问是否删除
       const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '警告', {
         confirmButtonText: '确定',

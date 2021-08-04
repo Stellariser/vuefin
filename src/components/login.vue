@@ -58,6 +58,8 @@ export default {
         // 将登陆成功后的token保存到客户端的sessionStorage中，项目中除了登陆之外的api接口只能在登陆之后访问，token只能在当前网页打开期间生效，所以将token保存在sessionStorage中
         console.log(res)
         window.sessionStorage.setItem('token', res.meta.token)
+        window.sessionStorage.setItem('name', res.meta.name)
+        window.sessionStorage.setItem('id', res.meta.id)
         // 发生页面跳转
         this.$router.push('/home')
       })

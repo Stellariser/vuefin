@@ -119,7 +119,7 @@ export default {
         columns: ['mark', 'percent'],
         rows: [{
           mark: '已标记占比',
-          percent: 0.64
+          percent: 0.53
         }]
       }
     }

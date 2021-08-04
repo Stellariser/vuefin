@@ -14,7 +14,7 @@
           </el-input>
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
+          <el-button type="primary" @click="addDialogVisible = true">添加场景</el-button>
         </el-col>
       </el-row>
 

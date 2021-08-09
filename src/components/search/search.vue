@@ -52,7 +52,6 @@
           <el-button type="primary" style="margin-left: 200px;" @click="addDialogVisible = true">批量下载</el-button>
         </el-col>
       </el-row>
-
       <!--用户列表区 -->
       <el-table :data="Framelist" border stripe>
         <el-table-column type="index"></el-table-column>

@@ -56,9 +56,9 @@
       <!--用户列表区 -->
       <el-table :data="Framelist" border stripe>
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="数据集名" prop="dataset_id"></el-table-column>
-        <el-table-column label="分类名" prop="dataset_id"></el-table-column>
-        <el-table-column label="场景" prop="scene_id"></el-table-column>
+        <el-table-column label="所属数据集" prop="name"></el-table-column>
+        <el-table-column label="包含分类" prop="classContent"></el-table-column>
+        <el-table-column label="包含场景" prop="sceneContent"></el-table-column>
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>

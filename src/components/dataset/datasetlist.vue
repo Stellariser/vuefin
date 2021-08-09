@@ -14,27 +14,30 @@
           </el-input>
         </el-col>
         <el-col :span="8">
-          <el-select v-model="value1" multiple style="margin-left: -400px;" placeholder="请选择场景">
+          <el-select v-model="queryInfo.valueS" @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -400px;" placeholder="请选择场景">
             <el-option
-              v-for="item in options1"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in optionsS"
+              :key="item.id"
+              :label="item.scene_name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="value2" multiple style="margin-left: -900px;" placeholder="请选择分类">
+          <el-select v-model="queryInfo.valueC"  @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择分类">
             <el-option
-              v-for="item in options2"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in optionsC"
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" style="margin-left: 180px;" @click="addDialogVisible = true">添加数据集</el-button>
+          <el-button type="primary" style="margin-left: -1100px;" @click="getDatasetList">搜索</el-button>
+        </el-col>
+        <el-col :span="2">
+          <el-button type="primary" style="margin-left: -100px;" @click="addDialogVisible = true">添加数据集</el-button>
         </el-col>
       </el-row>
       <!--用户列表区 -->
@@ -43,6 +46,8 @@
         <el-table-column label="数据集名" prop="name"></el-table-column>
         <el-table-column label="大小" prop="frames"></el-table-column>
         <el-table-column label="描述" prop="remarks"></el-table-column>
+        <el-table-column label="包含分类" prop="classContent"></el-table-column>
+        <el-table-column label="包含场景" prop="sceneContent"></el-table-column>
         <el-table-column label="上传人" prop="recorder"></el-table-column>
         <el-table-column label="上传时间" prop="record_time"></el-table-column>
         <el-table-column label="地点" prop="record_place"></el-table-column>
@@ -52,11 +57,6 @@
         <el-table-column label="修改时间" prop="update_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
         <el-table-column label="目的" prop="purpose"></el-table-column>
-        <el-table-column>
-          <template slot-scope="scope">
-            <el-switch v-model="scope.row.mg_state" @change="userStateChange(scope.row)"></el-switch>
-          </template>
-        </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             {{scope.nodes}}
@@ -192,17 +192,20 @@
 export default {
   data() {
     return {
-      options1: [],
-      value1: [],
-      value2: [],
+      optionsS: [],
+      optionsC: [],
       // 获取用户列表的参数对象
       queryInfo: {
         query: '',
         pageNumber: 1,
-        pageSize: 5
+        pageSize: 5,
+        valueS: [],
+        valueC: [],
+        VSString: '',
+        VCString: ''
       },
       datasetslist: [],
-      totalpage: 0,
+      total: 0,
       // 控制添加用户对话框的显示与隐藏
       addDialogVisible: false,
       // 控制修改用户对话框的显示和隐藏
@@ -245,17 +248,19 @@ export default {
   },
   created() {
     this.getDatasetList()
-    this.getTime()
   },
   methods: {
     async getDatasetList() {
+      this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
+      this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
+      this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
       const { data: res } = await this.$http.get('datasets/queryDatasetsVague', { params: this.queryInfo })
       console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
       this.datasetslist = res.data.datasets
-      this.totalpage = res.data.totalpage
+      this.total = res.data.totalpage
       console.log(res)
     },
     // 监听pagesize改变的事件
@@ -304,8 +309,20 @@ export default {
     async getScene () {
       const { data: res } = await this.$http.get('categorise/queryScene')
       if (res.meta.status === '200') {
-        this.options1 = res.data.scene // 把获取到的数据赋给this.data
+        this.optionsS = res.data.scene // 把获取到的数据赋给this.data
       }
+    },
+    sendScene () {
+      console.log(this.valueS)
+    },
+    async getClasscification () {
+      const { data: res } = await this.$http.get('categorise/queryClasscification')
+      if (res.meta.status === '200') {
+        this.optionsC = res.data.Classcification // 把获取到的数据赋给this.data
+      }
+    },
+    sendClasscification () {
+      console.log(this.valueC)
     }
   }
 }

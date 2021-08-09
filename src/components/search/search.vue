@@ -11,38 +11,41 @@
       <!--搜索与添加区域-->
       <el-row :gutter="20">
         <el-col :span="4">
-          <el-select v-model="value3" multiple style="margin-left: -50px;" placeholder="请选择数据集">
+          <el-select v-model="queryInfo.valueD" @focus="getDataset" @change="sendDataset(queryInfo.valueD)" multiple filterable remote style="margin-left: -50px;" placeholder="请选择数据集">
             <el-option
-              v-for="item in options3"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in optionsD"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-col >
         <el-col :span="4">
-          <el-select v-model="value1" multiple style="margin-left: -250px;" placeholder="请选择场景">
+          <el-select v-model="queryInfo.valueS" @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景">
             <el-option
-              v-for="item in options1"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in optionsS"
+              :key="item.id"
+              :label="item.scene_name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="value2" multiple style="margin-left: -450px;" placeholder="请选择分类">
+          <el-select v-model="queryInfo.valueC" @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类">
             <el-option
-              v-for="item in options2"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in optionsC"
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-col >
-        <el-col :span="8">
+        <el-col :span="2">
+          <el-button type="primary" style="margin-left: -600px;" @click="getFrameList">搜索</el-button>
+        </el-col>
+        <el-col :span="4">
           <el-input placeholder="请输入内容" style="margin-left: 200px;" class="input-with-select" v-model="queryInfo.query" clearable>
-            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
+            <el-button slot="append" icon="el-icon-search" @click="getFrameList"></el-button>
           </el-input>
         </el-col>
         <el-col :span="2">
@@ -51,20 +54,15 @@
       </el-row>
 
       <!--用户列表区 -->
-      <el-table :data="userlist" border stripe>
+      <el-table :data="Framelist" border stripe>
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="数据集名" prop="datasetid"></el-table-column>
-        <el-table-column label="分类" prop="classcification"></el-table-column>
-        <el-table-column label="场景" prop="scene"></el-table-column>
+        <el-table-column label="数据集名" prop="dataset_id"></el-table-column>
+        <el-table-column label="分类名" prop="dataset_id"></el-table-column>
+        <el-table-column label="场景" prop="scene_id"></el-table-column>
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
-        <el-table-column label="包含目标" prop="target"></el-table-column>
-        <el-table-column>
-          <template slot-scope="scope">
-            <el-switch v-model="scope.row.mg_state" @change="userStateChange(scope.row)"></el-switch>
-          </template>
-        </el-table-column>
+        <el-table-column label="包含目标" prop="target_id"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             {{scope.nodes}}
@@ -84,9 +82,9 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="queryInfo.pagenum"
+        :current-page="queryInfo.pageNumber"
         :page-sizes="[1, 2, 5, 10]"
-        :page-size="queryInfo.pagesize"
+        :page-size="queryInfo.pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total">
       </el-pagination>
@@ -162,64 +160,22 @@ export default {
   data() {
     return {
       fileList: [{ name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }, { name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }],
-      options1: [{
-        value: '选项1',
-        label: '公路'
-      }, {
-        value: '选项2',
-        label: '大桥'
-      }, {
-        value: '选项3',
-        label: '森林'
-      }, {
-        value: '选项4',
-        label: '湖泊'
-      }, {
-        value: '选项5',
-        label: '十字路口'
-      }],
-      options2: [{
-        value: '选项1',
-        label: '自行车'
-      }, {
-        value: '选项2',
-        label: '汽车'
-      }, {
-        value: '选项3',
-        label: '卡车'
-      }, {
-        value: '选项4',
-        label: '豪车'
-      }, {
-        value: '选项5',
-        label: '破车'
-      }],
-      options3: [{
-        value: '选项1',
-        label: '香港数据集1'
-      }, {
-        value: '选项2',
-        label: '香港数据集2'
-      }, {
-        value: '选项3',
-        label: '北京数据集1'
-      }, {
-        value: '选项4',
-        label: '北京数据集2'
-      }, {
-        value: '选项5',
-        label: '广州数据集'
-      }],
-      value1: [],
-      value2: [],
-      value3: [],
+      optionsS: [],
+      optionsC: [],
+      optionsD: [],
       // 获取用户列表的参数对象
       queryInfo: {
         query: '',
-        pagenum: 1,
-        pagesize: 2
+        pageNumber: 1,
+        pageSize: 5,
+        valueS: [],
+        valueC: [],
+        valueD: [],
+        VSString: '',
+        VCString: '',
+        VDString: ''
       },
-      userlist: [],
+      Framelist: [],
       total: 0,
       // 控制添加用户对话框的显示与隐藏
       addDialogVisible: false,
@@ -257,9 +213,21 @@ export default {
     }
   },
   created() {
-    this.getUserList()
+    this.getFrameList()
   },
   methods: {
+    async getFrameList() {
+      this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
+      this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
+      this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
+      const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
+      if (res.meta.status !== '200') {
+        return this.$message.error('数据获取失败')
+      }
+      this.Framelist = res.data.Frames
+      this.total = res.data.totalpage
+      console.log(res)
+    },
     async getUserList() {
       const { data: res } = await this.$http.get('users', { params: this.queryInfo })
       if (res.meta.status !== 200) {
@@ -271,13 +239,13 @@ export default {
     },
     // 监听pagesize改变的事件
     handleSizeChange(newSize) {
-      this.queryInfo.pagesize = newSize
-      this.getUserList()
+      this.queryInfo.pageSize = newSize
+      this.getFrameList()
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
-      this.queryInfo.pagenum = newPage
-      this.getUserList()
+      this.queryInfo.pageNumber = newPage
+      this.getFrameList()
     },
     // 监听switch状态的改变
     async userStateChange(userinfo) {
@@ -319,6 +287,33 @@ export default {
     },
     handlePreview(file) {
       console.log(file)
+    },
+    async getScene () {
+      const { data: res } = await this.$http.get('categorise/queryScene')
+      if (res.meta.status === '200') {
+        this.optionsS = res.data.scene // 把获取到的数据赋给this.data
+      }
+    },
+    sendScene () {
+      console.log(this.valueS)
+    },
+    async getDataset () {
+      const { data: res } = await this.$http.get('categorise/queryDataset')
+      if (res.meta.status === '200') {
+        this.optionsD = res.data.dataset // 把获取到的数据赋给this.data
+      }
+    },
+    async getClasscification () {
+      const { data: res } = await this.$http.get('categorise/queryClasscification')
+      if (res.meta.status === '200') {
+        this.optionsC = res.data.Classcification // 把获取到的数据赋给this.data
+      }
+    },
+    sendClasscification () {
+      console.log(this.valueC)
+    },
+    sendDataset () {
+      console.log(this.valueD)
     }
   }
 }

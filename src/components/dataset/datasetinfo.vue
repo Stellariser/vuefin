@@ -9,17 +9,17 @@
       <!--搜索与添加区域-->
       <el-row :gutter="20">
         <el-col :span="4">
-          <el-select v-model="value3" multiple style="margin-left: -50px;" placeholder="请选择数据集">
+          <el-select v-model="valueD" @focus="getDataset" @change="sendDatasets(valueD)" multiple filterable remote style="margin-left: -50px;" placeholder="请选择数据集">
             <el-option
               v-for="item in options3"
               :key="item.id"
-              :label="item.scene_name"
+              :label="item.name"
               :value="item.id">
             </el-option>
           </el-select>
         </el-col >
         <el-col :span="4">
-          <el-select v-model="value1" @focus="getScene" @change="sendScene(value1)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景" >
+          <el-select v-model="valueS" @focus="getScene" @change="sendScene(valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景" >
             <el-option
               v-for="item in options1"
               :key="item.id"
@@ -29,12 +29,12 @@
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="value2" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类" :remote-method="getClasscification">
+          <el-select v-model="valueC" @focus="getClasscification" @change="sendClasscification(valueC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类" :remote-method="getClasscification">
             <el-option
               v-for="item in options2"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-col >
@@ -172,10 +172,11 @@ export default {
     return {
       fileList: [{ name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }, { name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }],
       options1: [],
+      options2: [],
       options3: [],
-      value1: [],
-      value2: [],
-      value3: [],
+      valueS: [],
+      valueC: [],
+      valueD: [],
       // 获取用户列表的参数对象
       queryInfo: {
         query: '',
@@ -290,7 +291,25 @@ export default {
       }
     },
     sendScene () {
-      console.log(this.value1)
+      console.log(this.valueS)
+    },
+    async getDataset () {
+      const { data: res } = await this.$http.get('categorise/queryDataset')
+      if (res.meta.status === '200') {
+        this.options3 = res.data.dataset // 把获取到的数据赋给this.data
+      }
+    },
+    async getClasscification () {
+      const { data: res } = await this.$http.get('categorise/queryClasscification')
+      if (res.meta.status === '200') {
+        this.options2 = res.data.Classcification // 把获取到的数据赋给this.data
+      }
+    },
+    sendClasscification () {
+      console.log(this.valueC)
+    },
+    sendDatasets () {
+      console.log(this.valueD)
     }
   }
 }

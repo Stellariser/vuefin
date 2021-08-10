@@ -11,7 +11,7 @@
       <!--搜索与添加区域-->
       <el-row :gutter="20">
         <el-col :span="4">
-          <el-select v-model="queryInfo.valueD" @focus="getDataset" @change="sendDataset(queryInfo.valueD)" multiple filterable remote style="margin-left: -50px;" placeholder="请选择数据集">
+          <el-select v-model="queryInfo.valueD" collapse-tags @focus="getDataset" @change="sendDataset(queryInfo.valueD)" multiple filterable remote style="margin-left: -50px;" placeholder="请选择数据集">
             <el-option
               v-for="item in optionsD"
               :key="item.id"
@@ -21,7 +21,7 @@
           </el-select>
         </el-col >
         <el-col :span="4">
-          <el-select v-model="queryInfo.valueS" @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景">
+          <el-select v-model="queryInfo.valueS" collapse-tags @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景">
             <el-option
               v-for="item in optionsS"
               :key="item.id"
@@ -31,7 +31,7 @@
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="queryInfo.valueC" @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类">
+          <el-select v-model="queryInfo.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类">
             <el-option
               v-for="item in optionsC"
               :key="item.id"
@@ -40,20 +40,36 @@
             </el-option>
           </el-select>
         </el-col >
-        <el-col :span="2">
-          <el-button type="primary" style="margin-left: -600px;" @click="getFrameList">搜索</el-button>
-        </el-col>
-        <el-col :span="4">
-          <el-input placeholder="请输入内容" style="margin-left: 200px;" class="input-with-select" v-model="queryInfo.query" clearable>
-            <el-button slot="append" icon="el-icon-search" @click="getFrameList"></el-button>
-          </el-input>
-        </el-col>
-        <el-col :span="2">
-          <el-button type="primary" style="margin-left: 200px;" @click="addDialogVisible = true">批量下载</el-button>
+          <el-button type="primary" style="margin-left: -1600px;" @click="getFrameList">搜索</el-button>
+        <el-col style="margin-left: -20px; margin-top: -40px">
+          <el-radio v-model="queryInfo.extendLabel" @change="getFrameList" label="1" border >仅展示帧</el-radio>
+          <el-radio v-model="queryInfo.extendLabel" @change="getFrameList" label="2" border>展示帧的标签</el-radio>
         </el-col>
       </el-row>
+      <el-row :gutter="20" style="margin-top: -10px">
+        <el-col :span="8">
+          <el-select v-model="queryInfo.valueNS" collapse-tags @focus="getScene" @change="sendScene(queryInfo.valueNS)" multiple filterable remote style="margin-left: 120px;" placeholder="请选择不需要的场景">
+            <el-option
+              v-for="item in optionsNS"
+              :key="item.id"
+              :label="item.scene_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="4">
+          <el-select v-model="queryInfo.valueNC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueNC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择不需要的分类">
+            <el-option
+              v-for="item in optionsNC"
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col >
+      </el-row>
       <!--用户列表区 -->
-      <el-table :data="Framelist" border stripe>
+      <el-table :data="Framelist" border stripe style="margin-top: 50px">
         <el-table-column type="index"></el-table-column>
         <el-table-column label="所属数据集" prop="name"></el-table-column>
         <el-table-column label="包含分类" prop="classContent"></el-table-column>
@@ -61,6 +77,8 @@
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
+        <el-table-column label="帧分类" prop="class_name"></el-table-column>
+        <el-table-column label="帧场景" prop="scene_name"></el-table-column>
         <el-table-column label="包含目标" prop="target_id"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
@@ -162,17 +180,24 @@ export default {
       optionsS: [],
       optionsC: [],
       optionsD: [],
+      optionsNS: [],
+      optionsNC: [],
       // 获取用户列表的参数对象
       queryInfo: {
         query: '',
         pageNumber: 1,
-        pageSize: 5,
+        pageSize: 10,
         valueS: [],
         valueC: [],
         valueD: [],
+        valueNS: [],
+        valueNC: [],
         VSString: '',
         VCString: '',
-        VDString: ''
+        VDString: '',
+        VNSString: '',
+        VNCString: '',
+        extendLabel: '1'
       },
       Framelist: [],
       total: 0,
@@ -219,6 +244,8 @@ export default {
       this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
       this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
       this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
+      this.queryInfo.VNCString = JSON.stringify(this.queryInfo.valueNC)
+      this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
       const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
@@ -291,6 +318,7 @@ export default {
       const { data: res } = await this.$http.get('categorise/queryScene')
       if (res.meta.status === '200') {
         this.optionsS = res.data.scene // 把获取到的数据赋给this.data
+        this.optionsNS = res.data.scene
       }
     },
     sendScene () {
@@ -306,6 +334,7 @@ export default {
       const { data: res } = await this.$http.get('categorise/queryClasscification')
       if (res.meta.status === '200') {
         this.optionsC = res.data.Classcification // 把获取到的数据赋给this.data
+        this.optionsNC = res.data.Classcification
       }
     },
     sendClasscification () {
@@ -319,5 +348,4 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
 </style>

@@ -63,10 +63,7 @@
             <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
               <el-button type="primary" icon="el-icon-edit" size="mini" style="margin-left: 10px;" @click="showEditDialog"></el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini" style="margin-left: 60px;"></el-button>
-            </el-tooltip>
-            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
+            <el-tooltip effect="dark" content="添加标签" placement="top" :enterable="false">
               <el-button type="warning" icon="el-icon-setting" size="mini" style="margin-bottom: 20px;"></el-button>
             </el-tooltip>
           </template>
@@ -91,25 +88,28 @@
       @close="addDialogClose">
       <!--内容主体-->
       <el-form ref="addFormRef" :model="addForm" label-width="70px" :rules="addFormRules">
-        <el-form-item label="数据集名" prop="name">
-          <el-input v-model="addForm.name"></el-input>
+        <el-form-item label="数据集名" prop="dataset_name">
+          <el-input v-model="addForm.dataset_name"></el-input>
         </el-form-item>
         <el-form-item label="大小" prop="frames">
-          <el-input v-model="addForm.frames"></el-input>
+          <el-input v-model="addForm.size"></el-input>
+        </el-form-item>
+        <el-form-item label="目的" prop="purpose">
+          <el-input v-model="addForm.purpose"></el-input>
         </el-form-item>
         <el-form-item label="描述" prop="remarks">
-          <el-input v-model="addForm.remarks"></el-input>
+          <el-input v-model="addForm.remark"></el-input>
         </el-form-item>
-        <el-form-item label="上传人" prop="recorder">
+        <el-form-item label="录制人" prop="recorder">
           <el-input v-model="addForm.recorder"></el-input>
         </el-form-item>
-        <el-form-item label="上传时间" prop="record_time">
+        <el-form-item label="录制时间" prop="record_time">
           <el-input v-model="addForm.record_time"></el-input>
         </el-form-item>
-        <el-form-item label="地点" prop="record_place">
+        <el-form-item label="录制地点" prop="record_place">
           <el-input v-model="addForm.record_place"></el-input>
         </el-form-item>
-        <el-form-item label="创建人" prop="create_person">
+<!--        <el-form-item label="创建人" prop="create_person">
           <el-input v-model="addForm.create_person" disabled></el-input>
         </el-form-item>
         <el-form-item label="创建时间" prop="create_time">
@@ -120,12 +120,9 @@
         </el-form-item>
         <el-form-item label="修改时间" prop="update_time">
           <el-input v-model="addForm.update_time"></el-input>
-        </el-form-item>
+        </el-form-item>-->
         <el-form-item label="路径" prop="path">
           <el-input v-model="addForm.path"></el-input>
-        </el-form-item>
-        <el-form-item label="目的" prop="purpose">
-          <el-input v-model="addForm.purpose"></el-input>
         </el-form-item>
       </el-form>
       <!--底部按钮-->
@@ -142,14 +139,14 @@
       @close="editDialogClose">
       <!--内容主体-->
       <el-form ref="editFormRef" :model="addForm" label-width="70px" :rules="addFormRules">
-        <el-form-item label="数据集名" prop="name">
-          <el-input v-model="addForm.name"></el-input>
+        <el-form-item label="数据集名" prop="dataset_name">
+          <el-input v-model="addForm.dataset_name"></el-input>
         </el-form-item>
         <el-form-item label="大小" prop="frames">
           <el-input v-model="addForm.frames"></el-input>
         </el-form-item>
         <el-form-item label="描述" prop="remarks">
-          <el-input v-model="addForm.remarks"></el-input>
+          <el-input v-model="addForm.remark"></el-input>
         </el-form-item>
         <el-form-item label="上传人" prop="recorder">
           <el-input v-model="addForm.recorder"></el-input>
@@ -160,18 +157,18 @@
         <el-form-item label="地点" prop="record_place">
           <el-input v-model="addForm.record_place"></el-input>
         </el-form-item>
-        <el-form-item label="创建人" prop="create_person">
+<!--        <el-form-item label="创建人" prop="create_person">
           <el-input v-model="addForm.create_person"></el-input>
         </el-form-item>
         <el-form-item label="创建时间" prop="create_time">
           <el-input v-model="addForm.create_time"></el-input>
-        </el-form-item>
-        <el-form-item label="修改人" prop="update_person">
+        </el-form-item>-->
+<!--        <el-form-item label="修改人" prop="update_person">
           <el-input v-model="addForm.update_person"></el-input>
         </el-form-item>
         <el-form-item label="修改时间" prop="update_time">
           <el-input v-model="addForm.update_time"></el-input>
-        </el-form-item>
+        </el-form-item>-->
         <el-form-item label="路径" prop="path">
           <el-input v-model="addForm.path"></el-input>
         </el-form-item>
@@ -212,9 +209,9 @@ export default {
       editDialogVisible: false,
       // 添加用户的表单数据
       addForm: {
-        name: '',
-        frames: '',
-        remarks: '',
+        dataset_name: '',
+        size: '',
+        remark: '',
         recorder: '',
         record_time: '',
         record_place: '',
@@ -290,12 +287,12 @@ export default {
     addDataset() {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        this.addForm.create_person = window.sessionStorage.getItem('token')
-        const { data: res } = await this.$http.post('datasets/addDataset', this.addForm)
+        this.addForm.create_person = window.sessionStorage.getItem('name')
+        const { data: res } = await this.$http.post('audit/addAudit', this.addForm)
         if (res.meta.status !== '201') {
-          this.$message.error('添加用户失败')
+          this.$message.error('添加数据集失败')
         }
-        this.$message.success('添加用户成功')
+        this.$message.success('已经送去审核啦！')
         this.addDialogVisible = false
         this.getDatasetList()
       })

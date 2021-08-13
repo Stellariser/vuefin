@@ -31,7 +31,7 @@
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="queryInfo.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类">
+          <el-select v-model="queryInfo.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -480px;" placeholder="请选择分类">
             <el-option
               v-for="item in optionsC"
               :key="item.id"
@@ -40,8 +40,18 @@
             </el-option>
           </el-select>
         </el-col >
-          <el-button type="primary" style="margin-left: -1600px;" @click="getFrameList">搜索</el-button>
-        <el-col style="margin-left: -20px; margin-top: -40px">
+        <el-col :span="4">
+          <el-select v-model="queryInfo.valueT" collapse-tags @focus="getTag" @change="sendTag(queryInfo.valueT)" multiple filterable remote style="margin-left: -700px;" placeholder="请选择标签">
+            <el-option
+              v-for="item in optionsT"
+              :key="item.id"
+              :label="item.tag_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col >
+          <el-button type="primary" style="margin-left: -700px;" @click="getFrameList">搜索</el-button>
+        <el-col style="margin-left: 150px; margin-top: -40px">
           <el-radio v-model="queryInfo.extendLabel" @change="getFrameList" label="1" border >仅展示帧</el-radio>
           <el-radio v-model="queryInfo.extendLabel" @change="getFrameList" label="2" border>展示帧的标签</el-radio>
         </el-col>
@@ -58,11 +68,21 @@
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="queryInfo.valueNC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueNC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择不需要的分类">
+          <el-select v-model="queryInfo.valueNC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueNC)" multiple filterable remote style="margin-left: -480px;" placeholder="请选择不需要的分类">
             <el-option
               v-for="item in optionsNC"
               :key="item.id"
               :label="item.class_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col >
+        <el-col :span="4">
+          <el-select v-model="queryInfo.valueNT" collapse-tags @focus="getTag" @change="sendTag(queryInfo.valueNT)" multiple filterable remote style="margin-left: -700px;" placeholder="请选择不需要的标签">
+            <el-option
+              v-for="item in optionsNT"
+              :key="item.id"
+              :label="item.tag_name"
               :value="item.id">
             </el-option>
           </el-select>
@@ -74,6 +94,7 @@
         <el-table-column label="所属数据集" prop="name"></el-table-column>
         <el-table-column label="包含分类" prop="classContent"></el-table-column>
         <el-table-column label="包含场景" prop="sceneContent"></el-table-column>
+        <el-table-column label="包含标签" prop="tagConTent"></el-table-column>
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
@@ -180,8 +201,10 @@ export default {
       optionsS: [],
       optionsC: [],
       optionsD: [],
+      optionsT: [],
       optionsNS: [],
       optionsNC: [],
+      optionsNT: [],
       // 获取用户列表的参数对象
       queryInfo: {
         query: '',
@@ -190,13 +213,17 @@ export default {
         valueS: [],
         valueC: [],
         valueD: [],
+        valueT: [],
         valueNS: [],
         valueNC: [],
+        valueNT: [],
         VSString: '',
         VCString: '',
         VDString: '',
+        VTString: '',
         VNSString: '',
         VNCString: '',
+        VNTString: '',
         extendLabel: '1'
       },
       Framelist: [],
@@ -244,8 +271,10 @@ export default {
       this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
       this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
       this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
+      this.queryInfo.VTString = JSON.stringify(this.queryInfo.valueT)
       this.queryInfo.VNCString = JSON.stringify(this.queryInfo.valueNC)
       this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
+      this.queryInfo.VNTString = JSON.stringify(this.queryInfo.valueNT)
       const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
@@ -337,11 +366,21 @@ export default {
         this.optionsNC = res.data.Classcification
       }
     },
+    async getTag () {
+      const { data: res } = await this.$http.get('categorise/queryTag')
+      if (res.meta.status === '200') {
+        this.optionsT = res.data.Tag // 把获取到的数据赋给this.data
+        this.optionsNT = res.data.Tag
+      }
+    },
     sendClasscification () {
       console.log(this.valueC)
     },
     sendDataset () {
       console.log(this.valueD)
+    },
+    sendTag () {
+      console.log(this.valueT)
     }
   }
 }

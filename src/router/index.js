@@ -12,6 +12,7 @@ import datasetinfo from '@/components/dataset/datasetinfo'
 import datasetlist from '@/components/dataset/datasetlist'
 import scene from '@/components/categorise/scene'
 import classcification from '@/components/categorise/classcification'
+import Tag from '@/components/categorise/Tag'
 
 Vue.use(VueRouter)
 
@@ -33,7 +34,8 @@ const router = new VueRouter({
         { path: '/datasetinfo', component: datasetinfo },
         { path: '/datasetlist', component: datasetlist },
         { path: '/scene', component: scene },
-        { path: '/classcification', component: classcification }
+        { path: '/classcification', component: classcification },
+        { path: '/Tag', component: Tag }
       ]
     }
   ]

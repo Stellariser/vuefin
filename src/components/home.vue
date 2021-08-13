@@ -46,6 +46,7 @@
             <el-menu-item-group>
               <el-menu-item index="/scene"><i class="el-icon-menu"></i>场景</el-menu-item>
               <el-menu-item index="/classcification"><i class="el-icon-menu"></i>分类</el-menu-item>
+              <el-menu-item index="/Tag"><i class="el-icon-menu"></i>标签</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <!--一级菜单4-->

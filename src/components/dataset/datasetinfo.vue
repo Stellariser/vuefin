@@ -7,21 +7,11 @@
     <!--卡片视图区域-->
     <el-card class="box-card">
       <!--搜索与添加区域-->
-      <el-row :gutter="20">
+      <el-row :gutter="20" style="margin-left: 100px">
         <el-col :span="4">
-          <el-select v-model="valueD" @focus="getDataset" @change="sendDatasets(valueD)" multiple filterable remote style="margin-left: -50px;" placeholder="请选择数据集">
+          <el-select v-model="queryInfo.valueS" collapse-tags @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景">
             <el-option
-              v-for="item in options3"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-col >
-        <el-col :span="4">
-          <el-select v-model="valueS" @focus="getScene" @change="sendScene(valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景" >
-            <el-option
-              v-for="item in options1"
+              v-for="item in optionsS"
               :key="item.id"
               :label="item.scene_name"
               :value="item.id">
@@ -29,21 +19,63 @@
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="valueC" @focus="getClasscification" @change="sendClasscification(valueC)" multiple filterable remote style="margin-left: -450px;" placeholder="请选择分类" :remote-method="getClasscification">
+          <el-select v-model="queryInfo.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -480px;" placeholder="请选择分类">
             <el-option
-              v-for="item in options2"
+              v-for="item in optionsC"
               :key="item.id"
               :label="item.class_name"
               :value="item.id">
             </el-option>
           </el-select>
         </el-col >
-        <el-col :span="8">
-          <el-input placeholder="请输入内容" style="margin-left: 40px;" class="input-with-select" v-model="queryInfo.query" clearable>
-            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
-          </el-input>
-        </el-col>
         <el-col :span="4">
+          <el-select v-model="queryInfo.valueT" collapse-tags @focus="getTag" @change="sendTag(queryInfo.valueT)" multiple filterable remote style="margin-left: -700px;" placeholder="请选择标签">
+            <el-option
+              v-for="item in optionsT"
+              :key="item.id"
+              :label="item.tag_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col >
+        <el-button type="primary" style="margin-left: -1950px;" @click="getFrameList">搜索</el-button>
+        <el-col :span="2">
+          <el-button type="primary" style="margin-left: -600px;" @click="addDialogVisible = true">添加帧</el-button>
+        </el-col>
+      </el-row>
+      <el-row>
+          <el-col :span="8" style="margin-left: -277px">
+            <el-select v-model="queryInfo.valueNS" collapse-tags @focus="getScene" @change="sendScene(queryInfo.valueNS)" multiple filterable remote style="margin-left: 120px;" placeholder="请选择不需要的场景">
+              <el-option
+                v-for="item in optionsNS"
+                :key="item.id"
+                :label="item.scene_name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="4" style="margin-left: -15px">
+            <el-select v-model="queryInfo.valueNC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueNC)" multiple filterable remote style="margin-left: -480px;" placeholder="请选择不需要的分类">
+              <el-option
+                v-for="item in optionsNC"
+                :key="item.id"
+                :label="item.class_name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-col >
+          <el-col :span="4" style="margin-left: -14px">
+            <el-select v-model="queryInfo.valueNT" collapse-tags @focus="getTag" @change="sendTag(queryInfo.valueNT)" multiple filterable remote style="margin-left: -700px;" placeholder="请选择不需要的标签">
+              <el-option
+                v-for="item in optionsNT"
+                :key="item.id"
+                :label="item.tag_name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-col >
+      </el-row>
+      <el-row :gutter="20" style="margin-top: -130px; margin-left: 1800px">
         <el-upload
           class="upload-demo"
           ref="upload"
@@ -56,24 +88,20 @@
           <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">批量上传到服务器</el-button>
           <div slot="tip" class="el-upload__tip" style="margin-left: 10px;">只能上传CAM文件，且不超过1TB</div>
         </el-upload>
-        </el-col >
       </el-row>
-
       <!--用户列表区 -->
-      <el-table :data="userlist" border stripe>
+      <el-table :data="Framelist" border stripe style="margin-top: 50px">
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="数据集名" prop="datasetid"></el-table-column>
-        <el-table-column label="分类" prop="classcification"></el-table-column>
-        <el-table-column label="场景" prop="scene"></el-table-column>
+        <el-table-column label="所属数据集" prop="name"></el-table-column>
+        <el-table-column label="包含分类" prop="classContent"></el-table-column>
+        <el-table-column label="包含场景" prop="sceneContent"></el-table-column>
+        <el-table-column label="包含标签" prop="tagConTent"></el-table-column>
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
-        <el-table-column label="包含目标" prop="target"></el-table-column>
-        <el-table-column>
-          <template slot-scope="scope">
-            <el-switch v-model="scope.row.mg_state" @change="userStateChange(scope.row)"></el-switch>
-          </template>
-        </el-table-column>
+        <el-table-column label="帧分类" prop="class_name"></el-table-column>
+        <el-table-column label="帧场景" prop="scene_name"></el-table-column>
+        <el-table-column label="包含目标" prop="target_id"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             {{scope.nodes}}
@@ -102,7 +130,7 @@
     </el-card>
     <!--添加用户的对话框-->
     <el-dialog
-      title="添加用户"
+      title="添加帧"
       :visible.sync="addDialogVisible"
       width="50%"
       @close="addDialogClose">
@@ -170,20 +198,37 @@
 export default {
   data() {
     return {
+      detailId: '',
       fileList: [{ name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }, { name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }],
-      options1: [],
-      options2: [],
-      options3: [],
-      valueS: [],
-      valueC: [],
-      valueD: [],
+      optionsS: [],
+      optionsC: [],
+      optionsD: [],
+      optionsT: [],
+      optionsNS: [],
+      optionsNC: [],
+      optionsNT: [],
       // 获取用户列表的参数对象
       queryInfo: {
         query: '',
-        pagenum: 1,
-        pagesize: 2
+        pageNumber: 1,
+        pageSize: 10,
+        valueS: [],
+        valueC: [],
+        valueD: [],
+        valueT: [],
+        valueNS: [],
+        valueNC: [],
+        valueNT: [],
+        VSString: '',
+        VCString: '',
+        VDString: '',
+        VTString: '',
+        VNSString: '',
+        VNCString: '',
+        VNTString: '',
+        extendLabel: '0'
       },
-      userlist: [],
+      Framelist: [],
       total: 0,
       // 控制添加用户对话框的显示与隐藏
       addDialogVisible: false,
@@ -194,6 +239,7 @@ export default {
         datasetid: '',
         classcification: '',
         scene: '',
+        tag: '',
         create_person: '',
         create_time: '',
         path: '',
@@ -221,27 +267,40 @@ export default {
     }
   },
   created() {
-    this.getUserList()
+    console.log(this.$route.query.id)
+    this.queryInfo.valueD = parseInt(this.$route.query.id)
+    console.log(this.queryInfo.valueD)
+    this.getFrameList()
   },
   methods: {
-    async getUserList() {
-      const { data: res } = await this.$http.get('users', { params: this.queryInfo })
-      if (res.meta.status !== 200) {
+    shwoDetail() {
+    },
+    async getFrameList() {
+      this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
+      this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
+      this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
+      this.queryInfo.VTString = JSON.stringify(this.queryInfo.valueT)
+      this.queryInfo.VNCString = JSON.stringify(this.queryInfo.valueNC)
+      this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
+      this.queryInfo.VNTString = JSON.stringify(this.queryInfo.valueNT)
+      const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
+      if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
-      this.userlist = res.data.users
-      this.total = res.data.total
+      this.Framelist = res.data.Frames
+      this.total = res.data.totalpage
       console.log(res)
+      console.log(this.queryInfo.valueD)
     },
     // 监听pagesize改变的事件
     handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize
-      this.getUserList()
+      this.getFrameList()
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage
-      this.getUserList()
+      this.getFrameList()
     },
     // 监听switch状态的改变
     async userStateChange(userinfo) {
@@ -266,7 +325,7 @@ export default {
         }
         this.$message.success('添加用户成功')
         this.addDialogVisible = false
-        this.getUserList()
+        this.getFrameList()
       })
     },
     editDialogClose() {
@@ -287,7 +346,8 @@ export default {
     async getScene () {
       const { data: res } = await this.$http.get('categorise/queryScene')
       if (res.meta.status === '200') {
-        this.options1 = res.data.scene // 把获取到的数据赋给this.data
+        this.optionsS = res.data.scene // 把获取到的数据赋给this.data
+        this.optionsNS = res.data.scene
       }
     },
     sendScene () {
@@ -296,20 +356,31 @@ export default {
     async getDataset () {
       const { data: res } = await this.$http.get('categorise/queryDataset')
       if (res.meta.status === '200') {
-        this.options3 = res.data.dataset // 把获取到的数据赋给this.data
+        this.optionsD = res.data.dataset // 把获取到的数据赋给this.data
       }
     },
     async getClasscification () {
       const { data: res } = await this.$http.get('categorise/queryClasscification')
       if (res.meta.status === '200') {
-        this.options2 = res.data.Classcification // 把获取到的数据赋给this.data
+        this.optionsC = res.data.Classcification // 把获取到的数据赋给this.data
+        this.optionsNC = res.data.Classcification
+      }
+    },
+    async getTag () {
+      const { data: res } = await this.$http.get('categorise/queryTag')
+      if (res.meta.status === '200') {
+        this.optionsT = res.data.Tag // 把获取到的数据赋给this.data
+        this.optionsNT = res.data.Tag
       }
     },
     sendClasscification () {
       console.log(this.valueC)
     },
-    sendDatasets () {
+    sendDataset () {
       console.log(this.valueD)
+    },
+    sendTag () {
+      console.log(this.valueT)
     }
   }
 }

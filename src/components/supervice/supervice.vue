@@ -51,7 +51,7 @@
         <el-table-column label="录制时间" prop="record_time"></el-table-column>
         <el-table-column label="地点" prop="record_place"></el-table-column>
         <el-table-column label="创建人" prop="create_person"></el-table-column>
-        <el-table-column label="创建时间" prop="create_time"></el-table-column>
+        <el-table-column label="创建时间" prop="create_time" sortable></el-table-column>
         <el-table-column label="修改人" prop="update_person"></el-table-column>
         <el-table-column label="修改时间" prop="update_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
@@ -61,13 +61,13 @@
           <template slot-scope="scope">
             {{scope.nodes}}
             <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" style="margin-left: 10px;"  @click="showEditDialog(scope.row.id)"></el-button>
+              <el-button type="primary" icon="el-icon-edit" size="mini" style="margin-left: 10px;"  @click="showEditDialog(scope.row.id,scope.row.status)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="通过" placement="top" :enterable="false">
-              <el-button type="success" icon="el-icon-check" size="mini" style="margin-left: 60px;" @click="Approve(scope.row.id)"></el-button>
+              <el-button type="success" icon="el-icon-check" size="mini" style="margin-left: 60px;" @click="Approve(scope.row.id,scope.row.status)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="驳回" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-close" size="mini" style="margin-bottom: 20px;"></el-button>
+              <el-button type="danger" icon="el-icon-close" size="mini" style="margin-bottom: 20px;" @click="Deny(scope.row.id,scope.row.status)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -211,7 +211,8 @@ export default {
         update_person: '',
         update_time: '',
         path: '',
-        purpose: ''
+        purpose: '',
+        type: ''
       },
       editForm: {
         create_person: '',
@@ -226,7 +227,8 @@ export default {
         recorder: '',
         remark: '',
         size: '',
-        status: ''
+        status: '',
+        type: ''
       },
       approveForm: {
         create_person: '',
@@ -242,7 +244,8 @@ export default {
         remark: '',
         size: '',
         status: '',
-        auditor: ''
+        auditor: '',
+        type: ''
       },
       // 添加表单的验证规则对象
       addFormRules: {
@@ -289,16 +292,6 @@ export default {
       this.queryInfo.pageNumber = newPage
       this.getAuditList()
     },
-    // 监听switch状态的改变
-    async userStateChange(userinfo) {
-      console.log(userinfo)
-      const { data: res } = await this.$http.put(`users/${userinfo.id}/state/${userinfo.mg_state}`)
-      if (res.meta.status !== '200') {
-        userinfo.mg_state = !userinfo.mg_state
-        return this.$message.error('更新用户状态失败')
-      }
-      this.$message.success('更新用户状态成功')
-    },
     // 监听用户对话框的关闭
     addDialogClose() {
       this.$refs.addFormRef.resetFields()
@@ -319,7 +312,9 @@ export default {
     editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    async showEditDialog(id) {
+    async showEditDialog(id, status) {
+      if (status === '已审核') { return this.$message.error('不可重复操作已审核项') }
+      if (status === '已驳回') { return this.$message.error('不可重复操作已驳回项') }
       const tokenStr = window.sessionStorage.getItem('token')
       console.log(tokenStr)
       if (tokenStr !== '0') {
@@ -343,7 +338,9 @@ export default {
       await this.getAuditList()
     },
     // 通过申请
-    async Approve(id) {
+    async Approve(id, status) {
+      if (status === '已审核') { return this.$message.error('不可重复操作已审核项') }
+      if (status === '已驳回') { return this.$message.error('不可重复操作已驳回项') }
       const { data: res } = await this.$http.get('audit/getAuditById', { params: { id } })
       if (res.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
@@ -359,16 +356,15 @@ export default {
       await this.getAuditList()
     },
     // 根据id删除对应的用户信息
-    async removeUserById(id, status) {
+    async Deny(id, status) {
+      if (status === '已审核') { return this.$message.error('不可重复操作已审核项') }
+      if (status === '已驳回') { return this.$message.error('不可重复操作已驳回项') }
       const tokenStr = window.sessionStorage.getItem('token')
       if (tokenStr !== '0') {
         return this.$message.error('权限不够')
       }
-      if (id.toString() === window.sessionStorage.getItem('id')) {
-        return this.$message.error('你不能删除你自己')
-      }
       // 弹框询问是否删除
-      const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '警告', {
+      const confirmResult = await this.$confirm('确认要驳回这条修改吗?', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -377,12 +373,19 @@ export default {
       if (confirmResult !== 'confirm') {
         return this.$message.info('已取消')
       }
-      console.log('确认删除')
-      const { data: res } = await this.$http.get('user/removeUser', { params: { id } })
-      if (res.meta.status !== '200') {
-        return this.$message.error('删除用户信息失败')
+      console.log('确认驳回')
+      const { data: res2 } = await this.$http.get('audit/getAuditById', { params: { id } })
+      if (res2.meta.status !== '200') {
+        return this.$message.error('查询审核条目信息失败')
       }
-      this.$message.success('删除用户成功')
+      const tokenStr1 = window.sessionStorage.getItem('name')
+      this.approveForm = res2.data
+      this.approveForm.auditor = tokenStr1
+      const { data: res } = await this.$http.post('audit/deny', this.approveForm)
+      if (res.meta.status !== '200') {
+        return this.$message.error('驳回失败')
+      }
+      this.$message.success('驳回成功')
       await this.getAuditList()
     },
     async getScene () {

@@ -2,106 +2,31 @@
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">数据集管理</el-breadcrumb-item>
-      <el-breadcrumb-item>数据集详情</el-breadcrumb-item>
+      <el-breadcrumb-item>帧详情</el-breadcrumb-item>
     </el-breadcrumb>
     <!--卡片视图区域-->
     <el-card class="box-card">
       <!--搜索与添加区域-->
       <el-row :gutter="20" style="margin-left: 100px">
-        <el-col :span="4">
-          <el-select v-model="queryInfo.valueS" collapse-tags @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -250px;" placeholder="请选择场景">
-            <el-option
-              v-for="item in optionsS"
-              :key="item.id"
-              :label="item.scene_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="queryInfo.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -480px;" placeholder="请选择分类">
-            <el-option
-              v-for="item in optionsC"
-              :key="item.id"
-              :label="item.class_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-col >
-        <el-col :span="4">
-          <el-select v-model="queryInfo.valueT" collapse-tags @focus="getTag" @change="sendTag(queryInfo.valueT)" multiple filterable remote style="margin-left: -700px;" placeholder="请选择标签">
-            <el-option
-              v-for="item in optionsT"
-              :key="item.id"
-              :label="item.tag_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-col >
-        <el-button type="primary" style="margin-left: -1950px;" @click="getFrameList">搜索</el-button>
         <el-col :span="2">
-          <el-button type="primary" style="margin-left: -650px;" @click="addDialogVisible = true">添加帧</el-button>
+          <el-button type="primary" style="margin-left: -180px;" @click="addDialogVisible = true">添加标签</el-button>
         </el-col>
-      </el-row>
-      <el-row>
-          <el-col :span="8" style="margin-left: -277px">
-            <el-select v-model="queryInfo.valueNS" collapse-tags @focus="getScene" @change="sendScene(queryInfo.valueNS)" multiple filterable remote style="margin-left: 120px;" placeholder="请选择不需要的场景">
-              <el-option
-                v-for="item in optionsNS"
-                :key="item.id"
-                :label="item.scene_name"
-                :value="item.id">
-              </el-option>
-            </el-select>
-          </el-col>
-          <el-col :span="4" style="margin-left: -15px">
-            <el-select v-model="queryInfo.valueNC" collapse-tags @focus="getClasscification" @change="sendClasscification(queryInfo.valueNC)" multiple filterable remote style="margin-left: -480px;" placeholder="请选择不需要的分类">
-              <el-option
-                v-for="item in optionsNC"
-                :key="item.id"
-                :label="item.class_name"
-                :value="item.id">
-              </el-option>
-            </el-select>
-          </el-col >
-          <el-col :span="4" style="margin-left: -14px">
-            <el-select v-model="queryInfo.valueNT" collapse-tags @focus="getTag" @change="sendTag(queryInfo.valueNT)" multiple filterable remote style="margin-left: -700px;" placeholder="请选择不需要的标签">
-              <el-option
-                v-for="item in optionsNT"
-                :key="item.id"
-                :label="item.tag_name"
-                :value="item.id">
-              </el-option>
-            </el-select>
-          </el-col >
-      </el-row>
-      <el-row :gutter="20" style="margin-top: -130px; margin-left: 1800px">
-        <el-upload
-          class="upload-demo"
-          ref="upload"
-          action="https://jsonplaceholder.typicode.com/posts/"
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :file-list="fileList"
-          :auto-upload="false">
-          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">批量上传到服务器</el-button>
-          <div slot="tip" class="el-upload__tip" style="margin-left: 10px;">只能上传CAM文件，且不超过1TB</div>
-        </el-upload>
       </el-row>
       <!--用户列表区 -->
-      <el-table :data="Framelist" border stripe style="margin-top: 50px">
+      <el-table :data="Labellist" border stripe style="margin-top: 50px">
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="所属数据集" prop="name"></el-table-column>
-        <el-table-column label="包含分类" prop="classContent"></el-table-column>
-        <el-table-column label="包含场景" prop="sceneContent"></el-table-column>
-        <el-table-column label="包含标签" prop="tagConTent"></el-table-column>
-        <el-table-column label="创建人" prop="create_person"></el-table-column>
-        <el-table-column label="创建时间" prop="create_time"></el-table-column>
+        <el-table-column label="帧号" prop="frame_id"></el-table-column>
+        <el-table-column label="左侧x坐标" prop="left_point_x"></el-table-column>
+        <el-table-column label="左侧y坐标" prop="left_point_y"></el-table-column>
+        <el-table-column label="右侧x坐标" prop="right_point_x"></el-table-column>
+        <el-table-column label="右侧y坐标" prop="right_point_y"></el-table-column>
+        <el-table-column label="中心点x坐标" prop="centre_point_x"></el-table-column>
+        <el-table-column label="中心点y坐标" prop="centre_point_y"></el-table-column>
+        <el-table-column label="宽" prop="width"></el-table-column>
+        <el-table-column label="高" prop="height"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
-        <el-table-column label="帧分类" prop="class_name"></el-table-column>
-        <el-table-column label="帧场景" prop="scene_name"></el-table-column>
-        <el-table-column label="包含目标" prop="target_id"></el-table-column>
+        <el-table-column label="分类名" prop="class_name"></el-table-column>
+        <el-table-column label="场景名" prop="scene_name"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             {{scope.nodes}}
@@ -111,9 +36,6 @@
             <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
               <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="详情" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini" style="margin-bottom: 20px;" @click="shwoDetail(scope.row.id)"></el-button>
-            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -121,9 +43,9 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="queryInfo.pageNumber"
+        :current-page="queryInfo.pagenum"
         :page-sizes="[1, 2, 5, 10]"
-        :page-size="queryInfo.pageSize"
+        :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total">
       </el-pagination>
@@ -137,7 +59,7 @@
       <!--内容主体-->
       <el-form ref="addFormRef" :model="addForm" label-width="70px" :rules="addFormRules">
         <el-form-item label="分类" prop="valueC">
-          <el-select v-model="addForm.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(addForm.valueC)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择分类">
+          <el-select v-model="addForm.valueC" collapse-tags @focus="getClasscification" @change="sendClasscification(addForm.valueC)" filterable remote style="margin-left: -900px;" placeholder="请选择分类">
             <el-option
               v-for="item in optionsC"
               :key="item.id"
@@ -147,7 +69,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="场景" prop="valueS">
-          <el-select v-model="addForm.valueS" collapse-tags @focus="getScene" @change="sendScene(addForm.valueS)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择场景">
+          <el-select v-model="addForm.valueS" collapse-tags @focus="getScene" @change="sendScene(addForm.valueS)" filterable remote style="margin-left: -900px;" placeholder="请选择场景">
             <el-option
               v-for="item in optionsS"
               :key="item.id"
@@ -156,8 +78,8 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="标签" prop="valueT">
-          <el-select v-model="addForm.valueT" collapse-tags @focus="getTag" @change="sendTag(addForm.valueT)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择标签">
+<!--        <el-form-item label="标签" prop="valueT">
+          <el-select v-model="addForm.valueT" collapse-tags @focus="getTag" @change="sendTag(addForm.valueT)" filterable remote style="margin-left: -900px;" placeholder="请选择标签">
             <el-option
               v-for="item in optionsT"
               :key="item.id"
@@ -165,12 +87,33 @@
               :value="item.id">
             </el-option>
           </el-select>
+        </el-form-item>-->
+        <el-form-item label="左侧x" prop="left_point_x">
+          <el-input v-model="addForm.left_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="左侧y" prop="left_point_y">
+          <el-input v-model="addForm.left_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="右侧x" prop="right_point_x">
+          <el-input v-model="addForm.right_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="右侧y" prop="right_point_y">
+          <el-input v-model="addForm.right_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="中心点x" prop="centre_point_x">
+          <el-input v-model="addForm.centre_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="中心点y" prop="centre_point_y">
+          <el-input v-model="addForm.centre_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="宽" prop="width">
+          <el-input v-model="addForm.width"></el-input>
+        </el-form-item>
+        <el-form-item label="高" prop="height">
+          <el-input v-model="addForm.height"></el-input>
         </el-form-item>
         <el-form-item label="路径" prop="path">
           <el-input v-model="addForm.path"></el-input>
-        </el-form-item>
-        <el-form-item label="包含目标" prop="target">
-          <el-input v-model="addForm.target"></el-input>
         </el-form-item>
       </el-form>
       <!--底部按钮-->
@@ -230,6 +173,7 @@ export default {
         valueS: [],
         valueC: [],
         valueD: [],
+        valueF: [],
         valueT: [],
         valueNS: [],
         valueNC: [],
@@ -243,7 +187,7 @@ export default {
         VNTString: '',
         extendLabel: '0'
       },
-      Framelist: [],
+      Labellist: [],
       total: 0,
       // 控制添加用户对话框的显示与隐藏
       addDialogVisible: false,
@@ -251,17 +195,20 @@ export default {
       editDialogVisible: false,
       // 添加用户的表单数据
       addForm: {
-        datasetid: '',
-        classcification: '',
-        scene: '',
-        tag: '',
-        create_person: '',
-        create_time: '',
+        frame_id: '',
+        classification_id: '',
+        scene_id: '',
         path: '',
-        target: '',
         valueS: '',
         valueC: '',
-        valueT: ''
+        left_point_x: '',
+        left_point_y: '',
+        right_point_x: '',
+        right_point_y: '',
+        centre_point_x: '',
+        centre_point_y: '',
+        width: '',
+        height: ''
       },
       // 添加表单的验证规则对象
       addFormRules: {
@@ -286,58 +233,48 @@ export default {
   },
   created() {
     console.log(this.$route.query.id)
-    this.queryInfo.valueD = parseInt(this.$route.query.id)
-    console.log(this.queryInfo.valueD)
-    this.getFrameList()
+    this.queryInfo.valueF = parseInt(this.$route.query.id)
+    console.log(this.queryInfo.valueF)
+    this.getLabellist()
   },
   methods: {
-    shwoDetail(id) {
-      this.$router.push({ path: '/FrameInfo', query: { id } || this.redirect })
+    shwoDetail() {
     },
-    async getFrameList() {
-      this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
-      this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
-      this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
-      this.queryInfo.VTString = JSON.stringify(this.queryInfo.valueT)
-      this.queryInfo.VNCString = JSON.stringify(this.queryInfo.valueNC)
-      this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
-      this.queryInfo.VNTString = JSON.stringify(this.queryInfo.valueNT)
-      const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
+    async getLabellist() {
+      this.queryInfo.VFString = JSON.stringify(this.queryInfo.valueF)
+      const { data: res } = await this.$http.get('search/queryLabel', { params: this.queryInfo })
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
-      this.Framelist = res.data.Frames
+      this.Labellist = res.data.Labels
       this.total = res.data.totalpage
-      console.log(res)
-      console.log(this.queryInfo.valueD)
     },
     // 监听pagesize改变的事件
     handleSizeChange(newSize) {
-      this.queryInfo.pageSize = newSize
-      this.getFrameList()
+      this.queryInfo.pagesize = newSize
+      this.getLabellist()
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
-      this.queryInfo.pageNumber = newPage
-      this.getFrameList()
+      this.queryInfo.pagenum = newPage
+      this.getLabellist()
     },
     // 监听用户对话框的关闭
     addDialogClose() {
       this.$refs.addFormRef.resetFields()
     },
     async addFrame() {
-      this.addForm.datasetid = parseInt(this.$route.query.id)
-      this.addForm.create_person = window.sessionStorage.getItem('name')
-      this.addForm.classcification = JSON.stringify(this.addForm.valueC)
-      this.addForm.scene = JSON.stringify(this.addForm.valueS)
-      this.addForm.tag = JSON.stringify(this.addForm.valueT)
-      const { data: res } = await this.$http.get('audit/addFrameAudit', { params: this.addForm })
+      this.addForm.frame_id = parseInt(this.$route.query.id)
+      this.addForm.classification_id = JSON.stringify(this.addForm.valueC)
+      this.addForm.scene_id = JSON.stringify(this.addForm.valueS)
+      console.log(this.addForm)
+      const { data: res } = await this.$http.post('audit/addLabelAudit', this.addForm)
       if (res.meta.status !== '201') {
-        this.$message.error('添加数据集失败')
+        this.$message.error('添加标签失败')
       }
-      this.$message.success('已经送去审核啦！')
+      this.$message.success('已经送去啦！')
       this.addDialogVisible = false
-      this.getFrameList()
+      this.getLabellist()
     },
     editDialogClose() {
       this.$refs.editFormRef.resetFields()

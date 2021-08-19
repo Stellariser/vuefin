@@ -13,6 +13,8 @@ import datasetlist from '@/components/dataset/datasetlist'
 import scene from '@/components/categorise/scene'
 import classcification from '@/components/categorise/classcification'
 import Tag from '@/components/categorise/Tag'
+import FrameSupervice from '@/components/supervice/FrameSupervice'
+import FrameInfo from '@/components/dataset/frameInfo'
 
 Vue.use(VueRouter)
 
@@ -30,12 +32,14 @@ const router = new VueRouter({
         { path: '/search', component: search },
         { path: '/dataset', component: dataset },
         { path: '/supervice', component: supervice },
+        { path: '/FrameSupervice', component: FrameSupervice },
         { path: '/record', component: record },
         { path: '/datasetinfo', component: datasetinfo },
         { path: '/datasetlist', component: datasetlist },
         { path: '/scene', component: scene },
         { path: '/classcification', component: classcification },
-        { path: '/Tag', component: Tag }
+        { path: '/Tag', component: Tag },
+        { path: '/FrameInfo', component: FrameInfo }
       ]
     }
   ]

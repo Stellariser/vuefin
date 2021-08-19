@@ -35,6 +35,7 @@
             <el-menu-item-group>
               <el-menu-item index="/datasetlist"><i class="el-icon-menu"></i>数据集列表</el-menu-item>
               <el-menu-item index="/datasetinfo"><i class="el-icon-menu"></i>数据集详情</el-menu-item>
+              <el-menu-item index="/FrameInfo"><i class="el-icon-menu"></i>帧详情</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <!--一级菜单3-->
@@ -65,10 +66,16 @@
             <span slot="title">角色管理</span>
           </el-menu-item>
           <!--一级菜单7-->
-          <el-menu-item index="supervice">
-            <i class="el-icon-document"></i>
-            <span slot="title">审核管理</span>
-          </el-menu-item>
+          <el-submenu index="supervice">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>审核管理</span>
+            </template>
+            <el-menu-item-group>
+              <el-menu-item index="/supervice"><i class="el-icon-menu"></i>数据集审核</el-menu-item>
+              <el-menu-item index="/FrameSupervice"><i class="el-icon-menu"></i>帧审核</el-menu-item>
+            </el-menu-item-group>
+          </el-submenu>
           <!--一级菜单8-->
           <el-submenu index="other">
             <template slot="title">

@@ -344,6 +344,7 @@ export default {
     },
     showEditDialog() {
       this.editDialogVisible = true
+      this.editDialogVisible = true
     },
     submitUpload() {
       this.$refs.upload.submit()

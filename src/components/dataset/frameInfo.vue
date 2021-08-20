@@ -31,10 +31,10 @@
           <template slot-scope="scope">
             {{scope.nodes}}
             <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog"></el-button>
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeLabelById(scope.row.id)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -129,24 +129,59 @@
       width="50%"
       @close="editDialogClose">
       <!--内容主体-->
-      <el-form ref="editFormRef" :model="addForm" label-width="70px" :rules="addFormRules">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addForm.username"></el-input>
+      <el-form ref="editFormRef" :model="editForm" label-width="70px" :rules="addFormRules">
+        <el-form-item label="分类" prop="valueC">
+          <el-select v-model="editForm.valueC" collapse-tags @focus="getClasscification" @change="handleClassChange(editForm.valueC)" filterable remote style="margin-left: -900px;" placeholder="请选择分类">
+            <el-option
+              v-for="item in optionsC"
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
+        <el-form-item label="场景" prop="valueS">
+          <el-select v-model="editForm.valueS" collapse-tags @focus="getScene" @change="handleSceneChange(editForm.valueS)" filterable remote style="margin-left: -900px;" placeholder="请选择场景">
+            <el-option
+              v-for="item in optionsS"
+              :key="item.id"
+              :label="item.scene_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addForm.email"></el-input>
+        <el-form-item label="左侧x" prop="left_point_x">
+          <el-input v-model="editForm.left_point_x"></el-input>
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input v-model="addForm.mobile"></el-input>
+        <el-form-item label="左侧y" prop="left_point_y">
+          <el-input v-model="editForm.left_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="右侧x" prop="right_point_x">
+          <el-input v-model="editForm.right_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="右侧y" prop="right_point_y">
+          <el-input v-model="editForm.right_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="中心点x" prop="centre_point_x">
+          <el-input v-model="editForm.centre_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="中心点y" prop="centre_point_y">
+          <el-input v-model="editForm.centre_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="宽" prop="width">
+          <el-input v-model="editForm.width"></el-input>
+        </el-form-item>
+        <el-form-item label="高" prop="height">
+          <el-input v-model="editForm.height"></el-input>
+        </el-form-item>
+        <el-form-item label="路径" prop="path">
+          <el-input v-model="editForm.path"></el-input>
         </el-form-item>
       </el-form>
       <!--底部按钮-->
       <span slot="footer" class="dialog-footer">
     <el-button @click="editDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="addFrame">确 定</el-button>
+    <el-button type="primary" @click="editAuditInfo">确 定</el-button>
   </span>
     </el-dialog>
   </div>
@@ -195,6 +230,23 @@ export default {
       editDialogVisible: false,
       // 添加用户的表单数据
       addForm: {
+        frame_id: '',
+        classification_id: '',
+        scene_id: '',
+        path: '',
+        valueS: '',
+        valueC: '',
+        left_point_x: '',
+        left_point_y: '',
+        right_point_x: '',
+        right_point_y: '',
+        centre_point_x: '',
+        centre_point_y: '',
+        width: '',
+        height: ''
+      },
+      editForm: {
+        id: '',
         frame_id: '',
         classification_id: '',
         scene_id: '',
@@ -279,8 +331,38 @@ export default {
     editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    showEditDialog() {
+    async showEditDialog(id) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      console.log(tokenStr)
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      const { data: res } = await this.$http.get('label/getLabelById', { params: { id } })
+      if (res.meta.status !== '200') {
+        return this.$message.error('查询帧信息失败')
+      }
+      this.editForm = res.data
+      this.editForm.classification_id = res.data.classification_id
+      this.editForm.scene_id = res.data.scene_id
+      console.log(res.data)
+      console.log(this.editForm)
       this.editDialogVisible = true
+    },
+    async editAuditInfo() {
+      console.log(this.editForm.toString())
+      const { data: res } = await this.$http.post('label/editLabel', this.editForm)
+      if (res.meta.status !== '200') {
+        return this.$message.error('修改审核信息失败')
+      }
+      this.$message.success('修改请求已送审核')
+      this.editDialogVisible = false
+      await this.getLabellist()
+    },
+    handleSceneChange() {
+      this.editForm.scene_id = JSON.stringify(this.editForm.valueS)
+    },
+    handleClassChange() {
+      this.editForm.classification_id = JSON.stringify(this.editForm.valueC)
     },
     submitUpload() {
       this.$refs.upload.submit()
@@ -329,6 +411,30 @@ export default {
     },
     sendTag () {
       console.log(this.valueT)
+    },
+    // 根据id删除对应的帧信息
+    async removeLabelById(id) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      // 弹框询问是否删除
+      const confirmResult = await this.$confirm('此操作将永久删除该标签, 是否继续?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => { return err })
+      // 确认的话返回confirm，取消的话返回cancel
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('已取消')
+      }
+      console.log('确认删除')
+      const { data: res } = await this.$http.get('label/removeLabel', { params: { id } })
+      if (res.meta.status !== '200') {
+        return this.$message.error('删除标签信息失败')
+      }
+      this.$message.success('删除标签成功')
+      await this.getFrameList()
     }
   }
 }

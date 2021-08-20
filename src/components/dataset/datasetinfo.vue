@@ -99,17 +99,15 @@
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
-        <el-table-column label="帧分类" prop="class_name"></el-table-column>
-        <el-table-column label="帧场景" prop="scene_name"></el-table-column>
         <el-table-column label="包含目标" prop="target_id"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             {{scope.nodes}}
             <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog"></el-button>
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeFrameById(scope.row.id)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="详情" placement="top" :enterable="false">
               <el-button type="warning" icon="el-icon-setting" size="mini" style="margin-bottom: 20px;" @click="shwoDetail(scope.row.id)"></el-button>
@@ -181,29 +179,23 @@
     </el-dialog>
     <!--修改用户的对话框-->
     <el-dialog
-      title="修改用户"
+      title="修改帧"
       :visible.sync="editDialogVisible"
       width="50%"
       @close="editDialogClose">
       <!--内容主体-->
-      <el-form ref="editFormRef" :model="addForm" label-width="70px" :rules="addFormRules">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addForm.username"></el-input>
+      <el-form ref="editFormRef" :model="editForm" label-width="70px" :rules="addFormRules">
+        <el-form-item label="路径" prop="path">
+          <el-input v-model="editForm.path"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addForm.email"></el-input>
-        </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input v-model="addForm.mobile"></el-input>
+        <el-form-item label="包含目标" prop="target">
+          <el-input v-model="editForm.target_id"></el-input>
         </el-form-item>
       </el-form>
       <!--底部按钮-->
       <span slot="footer" class="dialog-footer">
     <el-button @click="editDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="addFrame">确 定</el-button>
+    <el-button type="primary" @click="editAuditInfo">确 定</el-button>
   </span>
     </el-dialog>
   </div>
@@ -263,6 +255,11 @@ export default {
         valueC: '',
         valueT: ''
       },
+      editForm: {
+        id: '',
+        path: '',
+        target_id: ''
+      },
       // 添加表单的验证规则对象
       addFormRules: {
         username: [
@@ -303,6 +300,7 @@ export default {
       this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
       this.queryInfo.VNTString = JSON.stringify(this.queryInfo.valueNT)
       const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
@@ -342,9 +340,30 @@ export default {
     editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    showEditDialog() {
+    async showEditDialog(id) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      console.log(tokenStr)
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      const { data: res } = await this.$http.get('frame/getFrameById', { params: { id } })
+      if (res.meta.status !== '200') {
+        return this.$message.error('查询帧信息失败')
+      }
+      this.editForm = res.data
+      console.log(res.data)
+      console.log(this.editForm)
       this.editDialogVisible = true
-      this.editDialogVisible = true
+    },
+    async editAuditInfo() {
+      console.log(this.editForm.toString())
+      const { data: res } = await this.$http.post('frame/editFrameInfo', this.editForm)
+      if (res.meta.status !== '200') {
+        return this.$message.error('修改帧信息失败')
+      }
+      this.$message.success('修改帧已送审核')
+      this.editDialogVisible = false
+      await this.getFrameList()
     },
     submitUpload() {
       this.$refs.upload.submit()
@@ -393,6 +412,30 @@ export default {
     },
     sendTag () {
       console.log(this.valueT)
+    },
+    // 根据id删除对应的帧信息
+    async removeFrameById(id) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      // 弹框询问是否删除
+      const confirmResult = await this.$confirm('此操作将永久删除该帧, 是否继续?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => { return err })
+      // 确认的话返回confirm，取消的话返回cancel
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('已取消')
+      }
+      console.log('确认删除')
+      const { data: res } = await this.$http.get('frame/removeFrame', { params: { id } })
+      if (res.meta.status !== '200') {
+        return this.$message.error('删除帧信息失败')
+      }
+      this.$message.success('删除帧成功')
+      await this.getFrameList()
     }
   }
 }

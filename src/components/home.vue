@@ -74,6 +74,7 @@
             <el-menu-item-group>
               <el-menu-item index="/supervice"><i class="el-icon-menu"></i>数据集审核</el-menu-item>
               <el-menu-item index="/FrameSupervice"><i class="el-icon-menu"></i>帧审核</el-menu-item>
+              <el-menu-item index="/LabelSupervice"><i class="el-icon-menu"></i>标签审核</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <!--一级菜单8-->

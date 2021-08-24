@@ -105,13 +105,10 @@
           <template slot-scope="scope">
             {{scope.nodes}}
             <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog"></el-button>
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id,scope.row.classlist,scope.row.scenelist,scope.row.taglist)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
-            </el-tooltip>
-            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeFrameById(scope.row.id,scope.row.classlist,scope.row.scenelist,scope.row.taglist)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -165,29 +162,53 @@
     </el-dialog>
     <!--修改用户的对话框-->
     <el-dialog
-      title="修改用户"
+      title="修改帧"
       :visible.sync="editDialogVisible"
       width="50%"
       @close="editDialogClose">
       <!--内容主体-->
-      <el-form ref="editFormRef" :model="addForm" label-width="70px" :rules="addFormRules">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addForm.username"></el-input>
+      <el-form ref="editFormRef" :model="editForm" label-width="70px" :rules="addFormRules">
+        <el-form-item label="分类" prop="valueC">
+          <el-select v-model="editForm.valueC" collapse-tags @focus="getClasscification" @change="sendEditClasscification(editForm.valueC)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择分类">
+            <el-option
+              v-for="item in optionsC"
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
+        <el-form-item label="场景" prop="valueS">
+          <el-select v-model="editForm.valueS" collapse-tags @focus="getScene" @change="sendEditScene(editForm.valueS)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择场景">
+            <el-option
+              v-for="item in optionsS"
+              :key="item.id"
+              :label="item.scene_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addForm.email"></el-input>
+        <el-form-item label="标签" prop="valueT">
+          <el-select v-model="editForm.valueT" collapse-tags @focus="getTag" @change="sendEditTag(editForm.valueT)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择标签">
+            <el-option
+              v-for="item in optionsT"
+              :key="item.id"
+              :label="item.tag_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="电话" prop="mobile">
-          <el-input v-model="addForm.mobile"></el-input>
+        <el-form-item label="路径" prop="path">
+          <el-input v-model="editForm.path"></el-input>
+        </el-form-item>
+        <el-form-item label="包含目标" prop="target">
+          <el-input v-model="editForm.target_id"></el-input>
         </el-form-item>
       </el-form>
       <!--底部按钮-->
       <span slot="footer" class="dialog-footer">
     <el-button @click="editDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="addUser">确 定</el-button>
+    <el-button type="primary" @click="editAuditInfo">确 定</el-button>
   </span>
     </el-dialog>
   </div>
@@ -225,6 +246,23 @@ export default {
         VNCString: '',
         VNTString: '',
         extendLabel: '1'
+      },
+      editForm: {
+        id: '',
+        path: '',
+        target_id: '',
+        classcontent: '',
+        scenecontent: '',
+        tagcontent: '',
+        update_person: '',
+        update_time: '',
+        datasetid: '',
+        valueC: '',
+        valueS: '',
+        valueT: '',
+        scenelist: '',
+        classlist: '',
+        taglist: ''
       },
       Framelist: [],
       total: 0,
@@ -283,15 +321,6 @@ export default {
       this.total = res.data.totalpage
       console.log(res)
     },
-    async getUserList() {
-      const { data: res } = await this.$http.get('users', { params: this.queryInfo })
-      if (res.meta.status !== 200) {
-        return this.$message.error('数据获取失败')
-      }
-      this.userlist = res.data.users
-      this.total = res.data.total
-      console.log(res)
-    },
     // 监听pagesize改变的事件
     handleSizeChange(newSize) {
       this.queryInfo.pageSize = newSize
@@ -302,37 +331,52 @@ export default {
       this.queryInfo.pageNumber = newPage
       this.getFrameList()
     },
-    // 监听switch状态的改变
-    async userStateChange(userinfo) {
-      console.log(userinfo)
-      const { data: res } = await this.$http.put(`users/${userinfo.id}/state/${userinfo.mg_state}`)
-      if (res.meta.status !== 200) {
-        userinfo.mg_state = !userinfo.mg_state
-        return this.$message.error('更新用户状态失败')
-      }
-      this.$message.success('更新用户状态成功')
-    },
     // 监听用户对话框的关闭
     addDialogClose() {
       this.$refs.addFormRef.resetFields()
     },
-    addUser() {
-      this.$refs.addFormRef.validate(async valid => {
-        if (!valid) return
-        const { data: res } = await this.$http.post('users', this.addForm)
-        if (res.meta.status !== 201) {
-          this.$message.error('添加用户失败')
-        }
-        this.$message.success('添加用户成功')
-        this.addDialogVisible = false
-        this.getUserList()
-      })
-    },
     editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    showEditDialog() {
+    async showEditDialog(id, classlist, scenelist, taglist) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      console.log(tokenStr)
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      const { data: res } = await this.$http.get('frame/getFrameById', { params: { id } })
+      if (res.meta.status !== '200') {
+        return this.$message.error('查询帧信息失败')
+      }
+      console.log(res)
+      this.editForm = res.data
+      if (classlist == null) {
+        classlist = '[]'
+      }
+      if (scenelist == null) {
+        scenelist = '[]'
+      }
+      if (taglist == null) {
+        taglist = '[]'
+      }
+      this.editForm.classlist = classlist
+      this.editForm.scenelist = scenelist
+      this.editForm.taglist = taglist
+      this.editForm.datasetid = parseInt(this.$route.query.id)
+      this.editForm.update_person = window.sessionStorage.getItem('name')
+      console.log(res.data)
+      console.log(this.editForm)
       this.editDialogVisible = true
+    },
+    async editAuditInfo() {
+      console.log(this.editForm.toString())
+      const { data: res } = await this.$http.post('frame/editFrameInfo', this.editForm)
+      if (res.meta.status !== '200') {
+        return this.$message.error('修改帧信息失败')
+      }
+      this.$message.success('修改帧已送审核')
+      this.editDialogVisible = false
+      await this.getFrameList()
     },
     submitUpload() {
       this.$refs.upload.submit()
@@ -359,6 +403,9 @@ export default {
         this.optionsD = res.data.dataset // 把获取到的数据赋给this.data
       }
     },
+    sendDataset () {
+      console.log(this.valueD)
+    },
     async getClasscification () {
       const { data: res } = await this.$http.get('categorise/queryClasscification')
       if (res.meta.status === '200') {
@@ -376,11 +423,64 @@ export default {
     sendClasscification () {
       console.log(this.valueC)
     },
-    sendDataset () {
-      console.log(this.valueD)
-    },
     sendTag () {
       console.log(this.valueT)
+    },
+    sendEditScene () {
+      this.editForm.scenelist = JSON.stringify(this.editForm.valueS)
+      console.log(this.editForm)
+    },
+    sendEditTag () {
+      this.editForm.taglist = JSON.stringify(this.editForm.valueT)
+      console.log(this.editForm)
+    },
+    sendEditClasscification () {
+      this.editForm.classlist = JSON.stringify(this.editForm.valueC)
+      console.log(this.editForm)
+    },
+    // 根据id删除对应的帧信息
+    async removeFrameById(id, classlist, scenelist, taglist) {
+      const tokenStr = window.sessionStorage.getItem('token')
+      if (tokenStr !== '0') {
+        return this.$message.error('权限不够')
+      }
+      // 弹框询问是否删除
+      const confirmResult = await this.$confirm('此操作将永久删除该帧, 是否继续?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => { return err })
+      // 确认的话返回confirm，取消的话返回cancel
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('已取消')
+      }
+      console.log('确认删除')
+      const { data: res } = await this.$http.get('frame/getFrameById', { params: { id } })
+      if (res.meta.status !== '200') {
+        return this.$message.error('查询帧信息失败')
+      }
+      this.editForm = res.data
+      if (classlist == null) {
+        classlist = '[]'
+      }
+      if (scenelist == null) {
+        scenelist = '[]'
+      }
+      if (taglist == null) {
+        taglist = '[]'
+      }
+      this.editForm.classlist = classlist
+      this.editForm.scenelist = scenelist
+      this.editForm.taglist = taglist
+      this.editForm.datasetid = parseInt(this.$route.query.id)
+      this.editForm.update_person = window.sessionStorage.getItem('name')
+      console.log(this.editForm)
+      const { data: ress } = await this.$http.post('frame/RemoveFrameInfo', this.editForm)
+      if (ress.meta.status !== '200') {
+        return this.$message.error('删除帧信息失败')
+      }
+      this.$message.success('删除帧已送审核')
+      await this.getFrameList()
     }
   }
 }

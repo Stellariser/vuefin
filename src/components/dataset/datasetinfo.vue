@@ -104,10 +104,10 @@
           <template slot-scope="scope">
             {{scope.nodes}}
             <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)"></el-button>
+              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id,scope.row.classlist,scope.row.scenelist,scope.row.taglist)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeFrameById(scope.row.id)"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeFrameById(scope.row.id,scope.row.classlist,scope.row.scenelist,scope.row.taglist)"></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="详情" placement="top" :enterable="false">
               <el-button type="warning" icon="el-icon-setting" size="mini" style="margin-bottom: 20px;" @click="shwoDetail(scope.row.id)"></el-button>
@@ -185,6 +185,36 @@
       @close="editDialogClose">
       <!--内容主体-->
       <el-form ref="editFormRef" :model="editForm" label-width="70px" :rules="addFormRules">
+        <el-form-item label="分类" prop="valueC">
+          <el-select v-model="editForm.valueC" collapse-tags @focus="getClasscification" @change="sendEditClasscification(editForm.valueC)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择分类">
+            <el-option
+              v-for="item in optionsC"
+              :key="item.id"
+              :label="item.class_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="场景" prop="valueS">
+          <el-select v-model="editForm.valueS" collapse-tags @focus="getScene" @change="sendEditScene(editForm.valueS)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择场景">
+            <el-option
+              v-for="item in optionsS"
+              :key="item.id"
+              :label="item.scene_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标签" prop="valueT">
+          <el-select v-model="editForm.valueT" collapse-tags @focus="getTag" @change="sendEditTag(editForm.valueT)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择标签">
+            <el-option
+              v-for="item in optionsT"
+              :key="item.id"
+              :label="item.tag_name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="路径" prop="path">
           <el-input v-model="editForm.path"></el-input>
         </el-form-item>
@@ -258,7 +288,19 @@ export default {
       editForm: {
         id: '',
         path: '',
-        target_id: ''
+        target_id: '',
+        classcontent: '',
+        scenecontent: '',
+        tagcontent: '',
+        update_person: '',
+        update_time: '',
+        datasetid: '',
+        valueC: '',
+        valueS: '',
+        valueT: '',
+        scenelist: '',
+        classlist: '',
+        taglist: ''
       },
       // 添加表单的验证规则对象
       addFormRules: {
@@ -340,7 +382,7 @@ export default {
     editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    async showEditDialog(id) {
+    async showEditDialog(id, classlist, scenelist, taglist) {
       const tokenStr = window.sessionStorage.getItem('token')
       console.log(tokenStr)
       if (tokenStr !== '0') {
@@ -350,7 +392,22 @@ export default {
       if (res.meta.status !== '200') {
         return this.$message.error('查询帧信息失败')
       }
+      console.log(res)
       this.editForm = res.data
+      if (classlist == null) {
+        classlist = '[]'
+      }
+      if (scenelist == null) {
+        scenelist = '[]'
+      }
+      if (taglist == null) {
+        taglist = '[]'
+      }
+      this.editForm.classlist = classlist
+      this.editForm.scenelist = scenelist
+      this.editForm.taglist = taglist
+      this.editForm.datasetid = parseInt(this.$route.query.id)
+      this.editForm.update_person = window.sessionStorage.getItem('name')
       console.log(res.data)
       console.log(this.editForm)
       this.editDialogVisible = true
@@ -381,8 +438,9 @@ export default {
         this.optionsNS = res.data.scene
       }
     },
-    sendScene () {
-      console.log(this.valueS)
+    sendEditScene () {
+      this.editForm.scenelist = JSON.stringify(this.editForm.valueS)
+      console.log(this.editForm)
     },
     async getDataset () {
       const { data: res } = await this.$http.get('categorise/queryDataset')
@@ -404,17 +462,19 @@ export default {
         this.optionsNT = res.data.Tag
       }
     },
-    sendClasscification () {
-      console.log(this.valueC)
+    sendEditTag () {
+      this.editForm.taglist = JSON.stringify(this.editForm.valueT)
+      console.log(this.editForm)
+    },
+    sendEditClasscification () {
+      this.editForm.classlist = JSON.stringify(this.editForm.valueC)
+      console.log(this.editForm)
     },
     sendDataset () {
       console.log(this.valueD)
     },
-    sendTag () {
-      console.log(this.valueT)
-    },
     // 根据id删除对应的帧信息
-    async removeFrameById(id) {
+    async removeFrameById(id, classlist, scenelist, taglist) {
       const tokenStr = window.sessionStorage.getItem('token')
       if (tokenStr !== '0') {
         return this.$message.error('权限不够')
@@ -430,11 +490,31 @@ export default {
         return this.$message.info('已取消')
       }
       console.log('确认删除')
-      const { data: res } = await this.$http.get('frame/removeFrame', { params: { id } })
+      const { data: res } = await this.$http.get('frame/getFrameById', { params: { id } })
       if (res.meta.status !== '200') {
+        return this.$message.error('查询帧信息失败')
+      }
+      this.editForm = res.data
+      if (classlist == null) {
+        classlist = '[]'
+      }
+      if (scenelist == null) {
+        scenelist = '[]'
+      }
+      if (taglist == null) {
+        taglist = '[]'
+      }
+      this.editForm.classlist = classlist
+      this.editForm.scenelist = scenelist
+      this.editForm.taglist = taglist
+      this.editForm.datasetid = parseInt(this.$route.query.id)
+      this.editForm.update_person = window.sessionStorage.getItem('name')
+      console.log(this.editForm)
+      const { data: ress } = await this.$http.post('frame/RemoveFrameInfo', this.editForm)
+      if (ress.meta.status !== '200') {
         return this.$message.error('删除帧信息失败')
       }
-      this.$message.success('删除帧成功')
+      this.$message.success('删除帧已送审核')
       await this.getFrameList()
     }
   }

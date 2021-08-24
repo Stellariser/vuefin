@@ -247,6 +247,7 @@ export default {
       },
       editForm: {
         id: '',
+        label_id: '',
         frame_id: '',
         classification_id: '',
         scene_id: '',
@@ -259,6 +260,8 @@ export default {
         right_point_y: '',
         centre_point_x: '',
         centre_point_y: '',
+        update_person: '',
+        update_time: '',
         width: '',
         height: ''
       },
@@ -344,12 +347,15 @@ export default {
       this.editForm = res.data
       this.editForm.classification_id = res.data.classification_id
       this.editForm.scene_id = res.data.scene_id
+      this.editForm.label_id = id
       console.log(res.data)
       console.log(this.editForm)
       this.editDialogVisible = true
     },
     async editAuditInfo() {
       console.log(this.editForm.toString())
+      const Str = window.sessionStorage.getItem('name')
+      this.editForm.update_person = Str
       const { data: res } = await this.$http.post('label/editLabel', this.editForm)
       if (res.meta.status !== '200') {
         return this.$message.error('修改审核信息失败')
@@ -429,11 +435,16 @@ export default {
         return this.$message.info('已取消')
       }
       console.log('确认删除')
-      const { data: res } = await this.$http.get('label/removeLabel', { params: { id } })
+      const { data: ress } = await this.$http.get('label/getLabelById', { params: { id } })
+      this.editForm = ress.data
+      this.editForm.classification_id = ress.data.classification_id
+      this.editForm.scene_id = ress.data.scene_id
+      this.editForm.label_id = id
+      const { data: res } = await this.$http.post('label/RemoveLabel', this.editForm)
       if (res.meta.status !== '200') {
         return this.$message.error('删除标签信息失败')
       }
-      this.$message.success('删除标签成功')
+      this.$message.success('删除标签已送审核')
       await this.getFrameList()
     }
   }

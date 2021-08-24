@@ -15,6 +15,7 @@ import classcification from '@/components/categorise/classcification'
 import Tag from '@/components/categorise/Tag'
 import FrameSupervice from '@/components/supervice/FrameSupervice'
 import FrameInfo from '@/components/dataset/frameInfo'
+import LabelSupervice from '@/components/supervice/LabelSupervice'
 
 Vue.use(VueRouter)
 
@@ -39,7 +40,8 @@ const router = new VueRouter({
         { path: '/scene', component: scene },
         { path: '/classcification', component: classcification },
         { path: '/Tag', component: Tag },
-        { path: '/FrameInfo', component: FrameInfo }
+        { path: '/FrameInfo', component: FrameInfo },
+        { path: '/LabelSupervice', component: LabelSupervice }
       ]
     }
   ]

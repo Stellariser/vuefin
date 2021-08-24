@@ -52,8 +52,6 @@
         <el-table-column label="地点" prop="record_place"></el-table-column>
         <el-table-column label="创建人" prop="create_person"></el-table-column>
         <el-table-column label="创建时间" prop="create_time" sortable></el-table-column>
-        <el-table-column label="修改人" prop="update_person"></el-table-column>
-        <el-table-column label="修改时间" prop="update_time"></el-table-column>
         <el-table-column label="路径" prop="path"></el-table-column>
         <el-table-column label="目的" prop="purpose"></el-table-column>
         <el-table-column label="状态" prop="status"></el-table-column>

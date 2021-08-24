@@ -2,7 +2,7 @@
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">数据管理系统</el-breadcrumb-item>
-      <el-breadcrumb-item>帧审核管理</el-breadcrumb-item>
+      <el-breadcrumb-item>标签审核管理</el-breadcrumb-item>
     </el-breadcrumb>
     <!--卡片视图区域-->
     <el-card class="box-card">
@@ -43,17 +43,21 @@
       <!--用户列表区 -->
       <el-table :data="FrameAuditlist" border stripe>
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="操作类型" prop="type"></el-table-column>
-        <el-table-column label="数据集编号" prop="dataset_id"></el-table-column>
-        <el-table-column label="包含场景" prop="scenecontent"></el-table-column>
-        <el-table-column label="包含分类" prop="classcontent"></el-table-column>
-        <el-table-column label="包含标签" prop="tagcontent"></el-table-column>
-        <el-table-column label="目标号" prop="target_id"></el-table-column>
-        <el-table-column label="创建人" prop="create_person"></el-table-column>
-        <el-table-column label="创建时间" prop="create_time" sortable></el-table-column>
+        <el-table-column label="操作" prop="type"></el-table-column>
+        <el-table-column label="帧号" prop="frame_id"></el-table-column>
+        <el-table-column label="左侧x坐标" prop="left_point_x"></el-table-column>
+        <el-table-column label="左侧y坐标" prop="left_point_y"></el-table-column>
+        <el-table-column label="右侧x坐标" prop="right_point_x"></el-table-column>
+        <el-table-column label="右侧y坐标" prop="right_point_y"></el-table-column>
+        <el-table-column label="中心点x坐标" prop="centre_point_x"></el-table-column>
+        <el-table-column label="中心点y坐标" prop="centre_point_y"></el-table-column>
+        <el-table-column label="宽" prop="width"></el-table-column>
+        <el-table-column label="高" prop="height"></el-table-column>
+        <el-table-column label="路径" prop="path"></el-table-column>
+        <el-table-column label="分类名" prop="classname"></el-table-column>
+        <el-table-column label="场景名" prop="scenename"></el-table-column>
         <el-table-column label="审核人" prop="auditor"></el-table-column>
         <el-table-column label="审核时间" prop="audit_time"></el-table-column>
-        <el-table-column label="路径" prop="path"></el-table-column>
         <el-table-column label="状态" prop="status"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
@@ -140,18 +144,8 @@
       @close="editDialogClose">
       <!--内容主体-->
       <el-form ref="editFormRef" :model="editForm" label-width="70px" :rules="addFormRules">
-        <el-form-item label="数据集号" prop="dataset_id">
-          <el-select v-model="editForm.valueD" collapse-tags @focus="getDataset" @change="datasetChange" filterable remote style="margin-left: -900px;" placeholder="请选择数据集">
-            <el-option
-              v-for="item in optionsD"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="分类" prop="valueC">
-          <el-select v-model="editForm.valueC" collapse-tags @focus="getClasscification" @change="classChange" multiple filterable remote style="margin-left: -900px;" placeholder="请选择分类">
+          <el-select v-model="editForm.valueC" collapse-tags @focus="getClasscification" @change="classChange" filterable remote style="margin-left: -900px;" placeholder="请选择分类">
             <el-option
               v-for="item in optionsC"
               :key="item.id"
@@ -161,7 +155,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="场景" prop="valueS">
-          <el-select v-model="editForm.valueS" collapse-tags @focus="getScene" @change="sceneChange" multiple filterable remote style="margin-left: -900px;" placeholder="请选择场景">
+          <el-select v-model="editForm.valueS" collapse-tags @focus="getScene" @change="sceneChange" filterable remote style="margin-left: -900px;" placeholder="请选择场景">
             <el-option
               v-for="item in optionsS"
               :key="item.id"
@@ -170,18 +164,29 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="标签" prop="valueT">
-          <el-select v-model="editForm.valueT" collapse-tags @focus="getTag" @change="tagChange" multiple filterable remote style="margin-left: -900px;" placeholder="请选择标签">
-            <el-option
-              v-for="item in optionsT"
-              :key="item.id"
-              :label="item.tag_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
+        <el-form-item label="左侧x" prop="left_point_x">
+          <el-input v-model="editForm.left_point_x"></el-input>
         </el-form-item>
-        <el-form-item label="目标号" prop="target_id">
-          <el-input v-model="editForm.target_id"></el-input>
+        <el-form-item label="左侧y" prop="left_point_y">
+          <el-input v-model="editForm.left_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="右侧x" prop="right_point_x">
+          <el-input v-model="editForm.right_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="右侧y" prop="right_point_y">
+          <el-input v-model="editForm.right_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="中心点x" prop="centre_point_x">
+          <el-input v-model="editForm.centre_point_x"></el-input>
+        </el-form-item>
+        <el-form-item label="中心点y" prop="centre_point_y">
+          <el-input v-model="editForm.centre_point_y"></el-input>
+        </el-form-item>
+        <el-form-item label="宽" prop="width">
+          <el-input v-model="editForm.width"></el-input>
+        </el-form-item>
+        <el-form-item label="高" prop="height">
+          <el-input v-model="editForm.height"></el-input>
         </el-form-item>
         <el-form-item label="路径" prop="path">
           <el-input v-model="editForm.path"></el-input>
@@ -241,6 +246,8 @@ export default {
         id: '',
         tag: '',
         dataset_id: '',
+        classification_id: '',
+        scene_id: '',
         frame_id: '',
         create_person: '',
         create_time: '',
@@ -250,10 +257,8 @@ export default {
         type: '',
         valueS: '',
         valueC: '',
-        valueT: '',
         valueD: '',
         scenelist: '',
-        taglist: '',
         classlist: ''
       },
       approveForm: {
@@ -276,6 +281,12 @@ export default {
         scenelist: '',
         taglist: '',
         classlist: ''
+      },
+      denyForm: {
+        id: '',
+        auditor: '',
+        audit_time: '',
+        status: ''
       },
       // 添加表单的验证规则对象
       addFormRules: {
@@ -303,7 +314,7 @@ export default {
   },
   methods: {
     async getFrameAuditlist() {
-      const { data: res } = await this.$http.get('audit/queryFrameAuditVague', { params: this.queryInfo })
+      const { data: res } = await this.$http.get('label/queryLabelAuditVague', { params: this.queryInfo })
       console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
@@ -350,7 +361,7 @@ export default {
       if (tokenStr !== '0') {
         return this.$message.error('权限不够')
       }
-      const { data: res } = await this.$http.get('audit/getFrameAuditById', { params: { id } })
+      const { data: res } = await this.$http.get('label/getLabelAuditById', { params: { id } })
       if (res.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
       }
@@ -358,7 +369,7 @@ export default {
       this.editDialogVisible = true
     },
     async editAuditInfo() {
-      const { data: res } = await this.$http.post('audit/editFrameAudit', this.editForm)
+      const { data: res } = await this.$http.post('label/editLabelAudit', this.editForm)
       if (res.meta.status !== '200') {
         return this.$message.error('修改审核信息失败')
       }
@@ -371,7 +382,7 @@ export default {
     async Approve(id, status) {
       if (status === '已审核') { return this.$message.error('不可重复操作已审核项') }
       if (status === '已驳回') { return this.$message.error('不可重复操作已驳回项') }
-      const { data: res } = await this.$http.get('audit/getFrameAuditById', { params: { id } })
+      const { data: res } = await this.$http.get('label/getLabelAuditById', { params: { id } })
       if (res.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
       }
@@ -379,7 +390,7 @@ export default {
       this.approveForm = res.data
       this.approveForm.auditor = tokenStr
       console.log(this.approveForm)
-      const { data: resa } = await this.$http.post('audit/approveFrame', this.approveForm)
+      const { data: resa } = await this.$http.post('label/approveLabel', this.approveForm)
       if (resa.meta.status !== '201') {
         this.$message.error('审核失败')
       }
@@ -405,14 +416,15 @@ export default {
         return this.$message.info('已取消')
       }
       console.log('确认驳回')
-      const { data: res2 } = await this.$http.get('audit/getFrameAuditById', { params: { id } })
+      const name = window.sessionStorage.getItem('name')
+      const { data: res2 } = await this.$http.get('label/denyLabel', { params: { id, name } })
       if (res2.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
       }
       const tokenStr1 = window.sessionStorage.getItem('name')
       this.approveForm = res2.data
       this.approveForm.auditor = tokenStr1
-      const { data: res } = await this.$http.post('audit/denyFrame', this.approveForm)
+      const { data: res } = await this.$http.post('audit/denyLabel', this.approveForm)
       if (res.meta.status !== '200') {
         return this.$message.error('驳回失败')
       }
@@ -456,17 +468,11 @@ export default {
     sendDataset () {
       console.log(this.valueD)
     },
-    datasetChange () {
-      this.editForm.dataset_id = this.editForm.valueD
-    },
     classChange () {
-      this.editForm.classlist = JSON.stringify(this.editForm.valueC)
+      this.editForm.classification_id = JSON.stringify(this.editForm.valueC)
     },
     sceneChange () {
-      this.editForm.scenelist = JSON.stringify(this.editForm.valueS)
-    },
-    tagChange () {
-      this.editForm.taglist = JSON.stringify(this.editForm.valueT)
+      this.editForm.scene_id = JSON.stringify(this.editForm.valueS)
     }
   }
 }

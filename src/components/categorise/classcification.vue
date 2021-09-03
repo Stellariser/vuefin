@@ -128,6 +128,7 @@ export default {
   methods: {
     async getclasscificationlist() {
       const { data: res } = await this.$http.get('categorise/queryClasscificationVague', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
@@ -157,6 +158,7 @@ export default {
       }
       this.addForm.create_person = window.sessionStorage.getItem('name')
       const { data: res } = await this.$http.post('categorise/addClass', this.addForm)
+      console.log(res)
       if (res.meta.status !== '201') {
         this.$message.error('添加用户失败')
       }
@@ -174,6 +176,7 @@ export default {
         return this.$message.error('权限不够')
       }
       const { data: res } = await this.$http.get('categorise/getClassById', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('查询分类信息失败')
       }
@@ -182,6 +185,7 @@ export default {
     },
     async editClassInfo() {
       const { data: res } = await this.$http.post('categorise/editClass', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改分类信息失败')
       }
@@ -209,6 +213,7 @@ export default {
       }
       console.log('确认删除')
       const { data: res } = await this.$http.get('categorise/removeClass', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('删除用户信息失败')
       }

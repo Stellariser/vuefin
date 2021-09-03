@@ -101,17 +101,6 @@
         <el-table-column label="帧分类" prop="class_name"></el-table-column>
         <el-table-column label="帧场景" prop="scene_name"></el-table-column>
         <el-table-column label="包含目标" prop="target_id"></el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            {{scope.nodes}}
-            <el-tooltip effect="dark" content="修改" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id,scope.row.classlist,scope.row.scenelist,scope.row.taglist)"></el-button>
-            </el-tooltip>
-            <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeFrameById(scope.row.id,scope.row.classlist,scope.row.scenelist,scope.row.taglist)"></el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
       </el-table>
       <!--分页-->
       <el-pagination
@@ -314,6 +303,7 @@ export default {
       this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
       this.queryInfo.VNTString = JSON.stringify(this.queryInfo.valueNT)
       const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }

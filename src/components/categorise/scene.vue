@@ -146,7 +146,9 @@ export default {
   },
   methods: {
     async getScenelist() {
+      console.log(this.queryInfo)
       const { data: res } = await this.$http.get('categorise/querySceneVague', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
@@ -175,7 +177,9 @@ export default {
         return this.$message.error('权限不够')
       }
       this.addForm.create_person = window.sessionStorage.getItem('name')
+      console.log(this.addForm)
       const { data: res } = await this.$http.post('categorise/addScene', this.addForm)
+      console.log(res)
       if (res.meta.status !== '201') {
         this.$message.error('添加场景失败')
       }
@@ -193,6 +197,7 @@ export default {
         return this.$message.error('权限不够')
       }
       const { data: res } = await this.$http.get('categorise/getSceneById', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('查询场景信息失败')
       }
@@ -201,6 +206,7 @@ export default {
     },
     async editSceneInfo() {
       const { data: res } = await this.$http.post('categorise/editScene', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改场景信息失败')
       }
@@ -228,6 +234,7 @@ export default {
       }
       console.log('确认删除')
       const { data: res } = await this.$http.get('categorise/removeScene', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('删除用户信息失败')
       }

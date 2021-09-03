@@ -109,18 +109,6 @@
         <el-form-item label="录制地点" prop="record_place">
           <el-input v-model="addForm.record_place"></el-input>
         </el-form-item>
-<!--        <el-form-item label="创建人" prop="create_person">
-          <el-input v-model="addForm.create_person" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="创建时间" prop="create_time">
-          <el-input v-model="addForm.create_time" ></el-input>
-        </el-form-item>
-        <el-form-item label="修改人" prop="update_person">
-          <el-input v-model="addForm.update_person"></el-input>
-        </el-form-item>
-        <el-form-item label="修改时间" prop="update_time">
-          <el-input v-model="addForm.update_time"></el-input>
-        </el-form-item>-->
         <el-form-item label="路径" prop="path">
           <el-input v-model="addForm.path"></el-input>
         </el-form-item>
@@ -160,18 +148,6 @@
         <el-form-item label="录制地点" prop="record_place">
           <el-input v-model="editForm.record_place"></el-input>
         </el-form-item>
-        <!--        <el-form-item label="创建人" prop="create_person">
-                  <el-input v-model="addForm.create_person" disabled></el-input>
-                </el-form-item>
-                <el-form-item label="创建时间" prop="create_time">
-                  <el-input v-model="addForm.create_time" ></el-input>
-                </el-form-item>
-                <el-form-item label="修改人" prop="update_person">
-                  <el-input v-model="addForm.update_person"></el-input>
-                </el-form-item>
-                <el-form-item label="修改时间" prop="update_time">
-                  <el-input v-model="addForm.update_time"></el-input>
-                </el-form-item>-->
         <el-form-item label="路径" prop="path">
           <el-input v-model="editForm.path"></el-input>
         </el-form-item>
@@ -270,8 +246,10 @@ export default {
     },
     async getDatasetList() {
       this.queryInfo.VCString = JSON.stringify(this.queryInfo.valueC)
+      console.log(this.queryInfo.VCString)
+      console.log(typeof (this.queryInfo.VCString))
       this.queryInfo.VSString = JSON.stringify(this.queryInfo.valueS)
-      this.queryInfo.VDString = JSON.stringify(this.queryInfo.valueD)
+      console.log(this.queryInfo)
       const { data: res } = await this.$http.get('datasets/queryDatasetsVague', { params: this.queryInfo })
       console.log(res)
       if (res.meta.status !== '200') {
@@ -311,6 +289,7 @@ export default {
         if (res.meta.status !== '201') {
           this.$message.error('添加数据集失败')
         }
+        console.log(res)
         this.$message.success('已经送去审核啦！')
         this.addDialogVisible = false
         this.getDatasetList()
@@ -344,6 +323,7 @@ export default {
       if (res.meta.status !== '201') {
         return this.$message.error('修改审核信息失败')
       }
+      console.log(res)
       this.$message.success('修改请求已送审核')
       this.addDialogVisible = false
       await this.getDatasetList()

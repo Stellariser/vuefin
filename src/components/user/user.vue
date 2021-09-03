@@ -86,7 +86,7 @@
           <el-input v-model="editForm.name"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="editForm.password" v-if="show"></el-input>
+          <el-input v-model="editForm.password"></el-input>
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-input v-model="editForm.status"></el-input>
@@ -184,6 +184,7 @@ export default {
   methods: {
     async getUserList() {
       const { data: res } = await this.$http.get('user/queryUserVague', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
@@ -230,6 +231,7 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
         const { data: res } = await this.$http.post('user/addUser', this.addForm)
+        console.log(res)
         if (res.meta.status !== '201') {
           this.$message.error('添加用户失败')
         }
@@ -248,6 +250,7 @@ export default {
         return this.$message.error('权限不够')
       }
       const { data: res } = await this.$http.get('user/getUserById', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('查询用户信息失败')
       }
@@ -256,6 +259,7 @@ export default {
     },
     async editUserInfo() {
       const { data: res } = await this.$http.post('user/editUser', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改用户信息失败')
       }
@@ -285,6 +289,7 @@ export default {
       }
       console.log('确认删除')
       const { data: res } = await this.$http.get('user/removeUser', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('删除用户信息失败')
       }

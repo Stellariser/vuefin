@@ -341,6 +341,7 @@ export default {
       this.queryInfo.VNCString = JSON.stringify(this.queryInfo.valueNC)
       this.queryInfo.VNSString = JSON.stringify(this.queryInfo.valueNS)
       this.queryInfo.VNTString = JSON.stringify(this.queryInfo.valueNT)
+      console.log(this.queryInfo)
       const { data: res } = await this.$http.get('search/queryFrame', { params: this.queryInfo })
       console.log(res)
       if (res.meta.status !== '200') {
@@ -371,10 +372,12 @@ export default {
       this.addForm.classcification = JSON.stringify(this.addForm.valueC)
       this.addForm.scene = JSON.stringify(this.addForm.valueS)
       this.addForm.tag = JSON.stringify(this.addForm.valueT)
+      console.log(this.addForm)
       const { data: res } = await this.$http.get('audit/addFrameAudit', { params: this.addForm })
       if (res.meta.status !== '201') {
         this.$message.error('添加数据集失败')
       }
+      console.log(res)
       this.$message.success('已经送去审核啦！')
       this.addDialogVisible = false
       this.getFrameList()
@@ -413,8 +416,9 @@ export default {
       this.editDialogVisible = true
     },
     async editAuditInfo() {
-      console.log(this.editForm.toString())
+      console.log(this.editForm)
       const { data: res } = await this.$http.post('frame/editFrameInfo', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改帧信息失败')
       }
@@ -511,6 +515,7 @@ export default {
       this.editForm.update_person = window.sessionStorage.getItem('name')
       console.log(this.editForm)
       const { data: ress } = await this.$http.post('frame/RemoveFrameInfo', this.editForm)
+      console.log(ress)
       if (ress.meta.status !== '200') {
         return this.$message.error('删除帧信息失败')
       }

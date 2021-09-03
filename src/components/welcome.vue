@@ -42,7 +42,7 @@
                     <img src="../assets/class5.png" alt="">
                   </div>
                   <div class="card-panel-text">
-                    已标记帧数
+                    总标签数
                     <count-to :start-val="0" :end-val="endValMark" :duration="2600" class="card-panel-num" />
                   </div>
                 </el-card>
@@ -62,7 +62,7 @@
               <ve-pie :data="chartData1"></ve-pie>
             </el-col>
             <el-col :span="8">
-              <ve-ring :data="chartData2" :settings="chartSettings"></ve-ring>
+              <ve-ring :data="chartData2" :settings="chartSettings" ></ve-ring>
             </el-col>
             <el-col :span="8">
               <ve-liquidfill :data="chartData3" :settings="LiquidChartSettings"></ve-liquidfill>
@@ -85,35 +85,51 @@ export default {
       LineChartData: {
         columns: ['日期', '分类', '场景', '标注'],
         rows: [
-          { 日期: '1/1', 分类: 1393, 场景: 2093, 标注: 500 },
-          { 日期: '1/2', 分类: 3530, 场景: 3230, 标注: 400 },
-          { 日期: '1/3', 分类: 2923, 场景: 2023, 标注: 1000 },
-          { 日期: '1/4', 分类: 1723, 场景: 1023, 标注: 1500 },
-          { 日期: '1/5', 分类: 3792, 场景: 2492, 标注: 4000 },
-          { 日期: '1/6', 分类: 4593, 场景: 4293, 标注: 2000 }
+          {
+            日期: '1/1',
+            分类: 1393,
+            场景: 2093,
+            标注: 500
+          },
+          {
+            日期: '1/2',
+            分类: 3530,
+            场景: 3230,
+            标注: 400
+          },
+          {
+            日期: '1/3',
+            分类: 2923,
+            场景: 2023,
+            标注: 1000
+          },
+          {
+            日期: '1/4',
+            分类: 1723,
+            场景: 1023,
+            标注: 1500
+          },
+          {
+            日期: '1/5',
+            分类: 3792,
+            场景: 2492,
+            标注: 4000
+          },
+          {
+            日期: '1/6',
+            分类: 4593,
+            场景: 4293,
+            标注: 2000
+          }
         ]
       },
       chartData1: {
-        columns: ['分类', '数量'],
-        rows: [
-          { 分类: '汽车', 数量: 1393 },
-          { 分类: '电瓶车', 数量: 3530 },
-          { 分类: '行人', 数量: 2923 },
-          { 分类: '超跑', 数量: 1723 },
-          { 分类: '半挂卡车', 数量: 3792 },
-          { 分类: '自行车', 数量: 4593 }
-        ]
+        columns: ['class_name', 'class_count'],
+        rows: []
       },
       chartData2: {
-        columns: ['场景', '数量'],
-        rows: [
-          { 场景: '山间', 数量: 1393 },
-          { 场景: '河谷', 数量: 3530 },
-          { 场景: '十字路口', 数量: 2923 },
-          { 场景: '辅路', 数量: 1723 },
-          { 场景: '高架桥', 数量: 3792 },
-          { 场景: '下坡', 数量: 4593 }
-        ]
+        columns: ['scene_name', 'scene_count'],
+        rows: []
       },
       chartData3: {
         columns: ['mark', 'percent'],
@@ -122,6 +138,24 @@ export default {
           percent: 0.53
         }]
       }
+    }
+  },
+  created () {
+    this.getGraphData()
+  },
+  methods: {
+    async getGraphData () {
+      const { data: res1 } = await this.$http.get('chart/getClassData')
+      console.log(res1)
+      this.chartData1.rows = res1.data
+      const { data: res2 } = await this.$http.get('chart/getSceneData')
+      console.log(res2)
+      this.chartData2.rows = res2.data
+      const { data: res3 } = await this.$http.get('chart/getAmountData')
+      this.endValClass = res3.classAmount
+      this.endValScene = res3.sceneCount
+      this.endValMark = res3.labelAmount
+      this.endValFrame = res3.frameAmount
     }
   }
 }

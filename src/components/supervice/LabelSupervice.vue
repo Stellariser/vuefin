@@ -6,41 +6,6 @@
     </el-breadcrumb>
     <!--卡片视图区域-->
     <el-card class="box-card">
-      <!--搜索与添加区域-->
-      <el-row :gutter="10">
-        <el-col :span="8">
-          <el-input placeholder="根据数据集名查找" class="input-with-select" v-model="queryInfo.query" clearable>
-            <el-button slot="append" icon="el-icon-search" @click="getDatasetList"></el-button>
-          </el-input>
-        </el-col>
-        <el-col :span="8">
-          <el-select v-model="queryInfo.valueS" @focus="getScene" @change="sendScene(queryInfo.valueS)" multiple filterable remote style="margin-left: -400px;" placeholder="请选择场景">
-            <el-option
-              v-for="item in optionsS"
-              :key="item.id"
-              :label="item.scene_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="queryInfo.valueC"  @focus="getClasscification" @change="sendClasscification(queryInfo.valueC)" multiple filterable remote style="margin-left: -900px;" placeholder="请选择分类">
-            <el-option
-              v-for="item in optionsC"
-              :key="item.id"
-              :label="item.class_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="2">
-          <el-button type="primary" style="margin-left: -1100px;" @click="getDatasetList">搜索</el-button>
-        </el-col>
-        <el-col :span="2">
-          <el-button type="primary" style="margin-left: -100px;" @click="addDialogVisible = true">添加数据集</el-button>
-        </el-col>
-      </el-row>
-      <!--用户列表区 -->
       <el-table :data="FrameAuditlist" border stripe>
         <el-table-column type="index"></el-table-column>
         <el-table-column label="操作" prop="type"></el-table-column>
@@ -362,6 +327,7 @@ export default {
         return this.$message.error('权限不够')
       }
       const { data: res } = await this.$http.get('label/getLabelAuditById', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
       }
@@ -370,6 +336,7 @@ export default {
     },
     async editAuditInfo() {
       const { data: res } = await this.$http.post('label/editLabelAudit', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改审核信息失败')
       }
@@ -382,6 +349,10 @@ export default {
     async Approve(id, status) {
       if (status === '已审核') { return this.$message.error('不可重复操作已审核项') }
       if (status === '已驳回') { return this.$message.error('不可重复操作已驳回项') }
+      const tokenStr1 = window.sessionStorage.getItem('token')
+      if (tokenStr1 !== '0') {
+        return this.$message.error('权限不够')
+      }
       const { data: res } = await this.$http.get('label/getLabelAuditById', { params: { id } })
       if (res.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
@@ -391,6 +362,7 @@ export default {
       this.approveForm.auditor = tokenStr
       console.log(this.approveForm)
       const { data: resa } = await this.$http.post('label/approveLabel', this.approveForm)
+      console.log(resa)
       if (resa.meta.status !== '201') {
         this.$message.error('审核失败')
       }
@@ -417,14 +389,16 @@ export default {
       }
       console.log('确认驳回')
       const name = window.sessionStorage.getItem('name')
-      const { data: res2 } = await this.$http.get('label/denyLabel', { params: { id, name } })
+      const { data: res2 } = await this.$http.get('label/getLabelAuditById', { params: { id } })
+      console.log(res2)
       if (res2.meta.status !== '200') {
         return this.$message.error('查询审核条目信息失败')
       }
       const tokenStr1 = window.sessionStorage.getItem('name')
       this.approveForm = res2.data
       this.approveForm.auditor = tokenStr1
-      const { data: res } = await this.$http.post('audit/denyLabel', this.approveForm)
+      const { data: res } = await this.$http.get('label/denyLabel', { params: { id, name } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('驳回失败')
       }

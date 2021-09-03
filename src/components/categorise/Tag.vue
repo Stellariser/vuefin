@@ -147,6 +147,7 @@ export default {
   methods: {
     async getTagList() {
       const { data: res } = await this.$http.get('categorise/queryTagVague', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
@@ -176,6 +177,7 @@ export default {
       }
       this.addForm.create_person = window.sessionStorage.getItem('name')
       const { data: res } = await this.$http.post('categorise/addTag', this.addForm)
+      console.log(res)
       if (res.meta.status !== '201') {
         this.$message.error('添加标签失败')
       }
@@ -193,6 +195,7 @@ export default {
         return this.$message.error('权限不够')
       }
       const { data: res } = await this.$http.get('categorise/getTagById', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('查询用户信息失败')
       }
@@ -201,6 +204,7 @@ export default {
     },
     async editTagInfo() {
       const { data: res } = await this.$http.post('categorise/editTag', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改标签信息失败')
       }
@@ -228,6 +232,7 @@ export default {
       }
       console.log('确认删除')
       const { data: res } = await this.$http.get('categorise/removeTag', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('删除用户信息失败')
       }

@@ -52,7 +52,7 @@
     </el-card>
     <!--添加用户的对话框-->
     <el-dialog
-      title="添加帧"
+      title="添加标签"
       :visible.sync="addDialogVisible"
       width="50%"
       @close="addDialogClose">
@@ -78,16 +78,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-<!--        <el-form-item label="标签" prop="valueT">
-          <el-select v-model="addForm.valueT" collapse-tags @focus="getTag" @change="sendTag(addForm.valueT)" filterable remote style="margin-left: -900px;" placeholder="请选择标签">
-            <el-option
-              v-for="item in optionsT"
-              :key="item.id"
-              :label="item.tag_name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>-->
         <el-form-item label="左侧x" prop="left_point_x">
           <el-input v-model="addForm.left_point_x"></el-input>
         </el-form-item>
@@ -122,9 +112,9 @@
     <el-button type="primary" @click="addFrame">确 定</el-button>
   </span>
     </el-dialog>
-    <!--修改用户的对话框-->
+    <!--修改标签的对话框-->
     <el-dialog
-      title="修改用户"
+      title="修改标签"
       :visible.sync="editDialogVisible"
       width="50%"
       @close="editDialogClose">
@@ -298,6 +288,7 @@ export default {
     async getLabellist() {
       this.queryInfo.VFString = JSON.stringify(this.queryInfo.valueF)
       const { data: res } = await this.$http.get('search/queryLabel', { params: this.queryInfo })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('数据获取失败')
       }
@@ -324,6 +315,7 @@ export default {
       this.addForm.scene_id = JSON.stringify(this.addForm.valueS)
       console.log(this.addForm)
       const { data: res } = await this.$http.post('audit/addLabelAudit', this.addForm)
+      console.log(res)
       if (res.meta.status !== '201') {
         this.$message.error('添加标签失败')
       }
@@ -341,6 +333,7 @@ export default {
         return this.$message.error('权限不够')
       }
       const { data: res } = await this.$http.get('label/getLabelById', { params: { id } })
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('查询帧信息失败')
       }
@@ -353,10 +346,11 @@ export default {
       this.editDialogVisible = true
     },
     async editAuditInfo() {
-      console.log(this.editForm.toString())
       const Str = window.sessionStorage.getItem('name')
       this.editForm.update_person = Str
+      console.log(this.editForm)
       const { data: res } = await this.$http.post('label/editLabel', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('修改审核信息失败')
       }
@@ -440,7 +434,9 @@ export default {
       this.editForm.classification_id = ress.data.classification_id
       this.editForm.scene_id = ress.data.scene_id
       this.editForm.label_id = id
+      console.log(this.editForm)
       const { data: res } = await this.$http.post('label/RemoveLabel', this.editForm)
+      console.log(res)
       if (res.meta.status !== '200') {
         return this.$message.error('删除标签信息失败')
       }
